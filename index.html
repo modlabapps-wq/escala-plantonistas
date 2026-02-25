@@ -3,55 +3,57 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Escala Plantão • Fiscais</title>
+  <title>Escala Plantão • Pêssego Transportes</title>
 
-  <!-- html2canvas (para gerar print do calendário) -->
+  <!-- Supabase JS v2 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- html2canvas (print do calendário) -->
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
   <style>
     :root{
-      --bg0:#ecfff2;
-      --bg1:#dfffe9;
-      --panel: rgba(255,255,255,.72);
-      --panel2: rgba(255,255,255,.84);
-      --border: rgba(0,0,0,.10);
-      --text: #0b1a10;
-      --muted: rgba(11,26,16,.65);
-      --muted2: rgba(11,26,16,.50);
+      /* TEMA PÊSSEGO (vermelho claro + branco) */
+      --bg0:#fff6f7;
+      --bg1:#ffe6ea;
+      --panel: rgba(255,255,255,.78);
+      --panel2: rgba(255,255,255,.92);
+      --border: rgba(120,10,30,.14);
 
-      --c1:#00d4ff; /* ciano */
-      --c2:#a100ff; /* roxo */
-      --c3:#00d67a; /* verde */
+      --text: #2a0b12;
+      --muted: rgba(42,11,18,.66);
+      --muted2: rgba(42,11,18,.48);
+
+      --c1:#ff3b5c;   /* vermelho */
+      --c2:#ff6b81;   /* vermelho claro */
+      --c3:#ffffff;
+
       --warn:#ffb300;
       --danger:#ff2f5d;
+      --ok:#20b36b;
 
       --radius:18px;
-      --shadow: 0 14px 34px rgba(0,0,0,.12);
-      --shadow2: 0 10px 26px rgba(0,0,0,.10);
-      --glow1: 0 0 18px rgba(0,212,255,.26);
-      --glow2: 0 0 20px rgba(161,0,255,.20);
-      --glow3: 0 0 18px rgba(0,214,122,.18);
+      --shadow: 0 16px 40px rgba(120,10,30,.14);
+      --shadow2: 0 10px 26px rgba(120,10,30,.10);
 
       --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
 
-      /* Cores por tipo */
-      --chip-trabalho-bg: rgba(0, 214, 122, .14);
-      --chip-trabalho-bd: rgba(0, 214, 122, .55);
+      --chip-trabalho-bg: rgba(32,179,107,.14);
+      --chip-trabalho-bd: rgba(32,179,107,.45);
 
-      --chip-plantao-bg: rgba(0, 212, 255, .14);
-      --chip-plantao-bd: rgba(0, 212, 255, .55);
+      --chip-plantao-bg: rgba(255,59,92,.12);
+      --chip-plantao-bd: rgba(255,59,92,.42);
 
-      --chip-ferias-bg: rgba(161, 0, 255, .10);
-      --chip-ferias-bd: rgba(161, 0, 255, .50);
+      --chip-ferias-bg: rgba(255,107,129,.14);
+      --chip-ferias-bd: rgba(255,107,129,.45);
 
-      --chip-folga-bg: rgba(255, 179, 0, .16);
-      --chip-folga-bd: rgba(255, 179, 0, .55);
+      --chip-folga-bg: rgba(255,179,0,.16);
+      --chip-folga-bd: rgba(255,179,0,.50);
 
-      --chip-cobertura-bg: rgba(255, 47, 93, .12);
-      --chip-cobertura-bd: rgba(255, 47, 93, .55);
+      --chip-cobertura-bg: rgba(255,47,93,.12);
+      --chip-cobertura-bd: rgba(255,47,93,.42);
 
-      --toast:#0b1a10;
+      --toast:#2a0b12;
     }
 
     *{ box-sizing: border-box; }
@@ -61,32 +63,44 @@
       font-family: var(--sans);
       color: var(--text);
       background:
-        radial-gradient(1200px 700px at 20% 15%, rgba(161,0,255,.10), transparent 55%),
-        radial-gradient(900px 520px at 75% 20%, rgba(0,212,255,.12), transparent 55%),
-        radial-gradient(900px 520px at 60% 90%, rgba(0,214,122,.10), transparent 55%),
+        radial-gradient(1200px 700px at 20% 15%, rgba(255,59,92,.12), transparent 55%),
+        radial-gradient(900px 520px at 80% 20%, rgba(255,107,129,.12), transparent 55%),
+        radial-gradient(900px 520px at 60% 92%, rgba(255,59,92,.10), transparent 55%),
         linear-gradient(180deg, var(--bg0), var(--bg1));
       overflow-x:hidden;
     }
 
-    .hidden{ display:none !important; }
-
-    .neon-ring{
+    /* Fundo “desenhado” com linhas e curvas (leve) */
+    .bg-art{
       position: fixed;
-      top: -220px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 720px;
-      height: 720px;
-      border-radius: 50%;
-      pointer-events:none;
-      opacity:.65;
-      background:
-        radial-gradient(circle at 50% 50%, transparent 58%, rgba(0,0,0,.0) 58%),
-        conic-gradient(from 0deg, var(--c2), var(--c1), var(--c3), var(--c2));
-      -webkit-mask: radial-gradient(circle, transparent 58%, #000 61%);
-      mask: radial-gradient(circle, transparent 58%, #000 61%);
-      filter: blur(.2px);
+      inset: 0;
+      pointer-events: none;
+      opacity: .9;
+      z-index: -1;
+      background-image:
+        radial-gradient(circle at 10% 30%, rgba(255,59,92,.12), transparent 38%),
+        radial-gradient(circle at 90% 25%, rgba(255,107,129,.14), transparent 40%),
+        radial-gradient(circle at 55% 85%, rgba(255,59,92,.10), transparent 42%),
+        url('data:image/svg+xml;utf8,\
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900">\
+  <g fill="none" stroke-linecap="round">\
+    <path d="M-80 220 C 220 40, 520 400, 820 220 C 1120 40, 1320 360, 1560 160" stroke="rgba(255,59,92,0.22)" stroke-width="3"/>\
+    <path d="M-120 320 C 240 120, 520 520, 860 300 C 1180 90, 1320 520, 1560 320" stroke="rgba(255,107,129,0.20)" stroke-width="2.6"/>\
+    <path d="M-100 480 C 220 260, 520 700, 860 480 C 1160 280, 1320 740, 1560 520" stroke="rgba(255,59,92,0.16)" stroke-width="2.2"/>\
+    <path d="M-140 620 C 240 420, 520 860, 900 620 C 1200 430, 1320 870, 1560 700" stroke="rgba(255,107,129,0.16)" stroke-width="2"/>\
+  </g>\
+  <g opacity="0.28">\
+    <circle cx="220" cy="720" r="110" fill="rgba(255,59,92,0.16)"/>\
+    <circle cx="1180" cy="690" r="140" fill="rgba(255,107,129,0.14)"/>\
+    <circle cx="980" cy="180" r="110" fill="rgba(255,59,92,0.12)"/>\
+  </g>\
+</svg>');
+      background-size: cover;
+      background-position: center;
+      filter: saturate(1.05);
     }
+
+    .hidden{ display:none !important; }
 
     .wrap{
       max-width: 1760px;
@@ -111,18 +125,23 @@
       padding: 10px 12px;
       border-radius: 999px;
       border: 1px solid var(--border);
-      background: linear-gradient(180deg, rgba(255,255,255,.78), rgba(255,255,255,.58));
+      background: linear-gradient(180deg, rgba(255,255,255,.90), rgba(255,255,255,.72));
       box-shadow: var(--shadow2);
       backdrop-filter: blur(10px);
     }
-    .dot{
-      width:12px;height:12px;border-radius:50%;
-      background: radial-gradient(circle at 30% 30%, #fff, rgba(255,255,255,.35));
-      box-shadow: 0 0 16px rgba(0,212,255,.30), 0 0 18px rgba(161,0,255,.18);
-      border:1px solid rgba(0,0,0,.10);
+
+    .brand-logo{
+      width: 54px;
+      height: 30px;
+      object-fit: contain;
+      border-radius: 10px;
+      padding: 4px 6px;
+      background: rgba(255,255,255,.92);
+      border: 1px solid rgba(120,10,30,.10);
     }
-    .brand h1{ margin:0; font-size: 14px; letter-spacing:.3px; font-weight: 850; }
-    .brand span{ display:block; font-size:12px; color: var(--muted); margin-top: 2px; letter-spacing:.15px; font-weight: 650; }
+
+    .brand h1{ margin:0; font-size: 14px; letter-spacing:.3px; font-weight: 900; }
+    .brand span{ display:block; font-size:12px; color: var(--muted); margin-top: 2px; letter-spacing:.15px; font-weight: 700; }
 
     .actions{
       display:flex;
@@ -136,12 +155,12 @@
     .btn{
       appearance:none;
       border:1px solid var(--border);
-      background: linear-gradient(180deg, rgba(255,255,255,.86), rgba(255,255,255,.62));
+      background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.72));
       color: var(--text);
       padding: 10px 12px;
       border-radius: 12px;
       cursor:pointer;
-      font-weight: 800;
+      font-weight: 900;
       letter-spacing: .15px;
       transition: transform .06s ease, border-color .15s ease, filter .15s ease;
       box-shadow: var(--shadow2);
@@ -152,20 +171,19 @@
       user-select:none;
       white-space:nowrap;
     }
-    .btn:hover{ border-color: rgba(0,0,0,.18); filter: brightness(1.02); }
+    .btn:hover{ border-color: rgba(120,10,30,.22); filter: brightness(1.02); }
     .btn:active{ transform: translateY(1px); }
     .btn:disabled{ opacity:.6; cursor:not-allowed; }
 
-    .btn.primary{ border-color: rgba(0,212,255,.42); box-shadow: var(--shadow2), var(--glow1); }
-    .btn.purple{ border-color: rgba(161,0,255,.32); box-shadow: var(--shadow2), var(--glow2); }
-    .btn.green{ border-color: rgba(0,214,122,.36); box-shadow: var(--shadow2), var(--glow3); }
-    .btn.danger{ border-color: rgba(255,47,93,.35); box-shadow: var(--shadow2); }
+    .btn.primary{ border-color: rgba(255,59,92,.40); }
+    .btn.green{ border-color: rgba(32,179,107,.38); }
+    .btn.danger{ border-color: rgba(255,47,93,.35); }
 
     .pill{
       padding: 10px 12px;
       border-radius: 14px;
       border:1px solid var(--border);
-      background: rgba(255,255,255,.66);
+      background: rgba(255,255,255,.78);
       box-shadow: var(--shadow2);
       backdrop-filter: blur(10px);
       display:flex;
@@ -174,8 +192,8 @@
     }
 
     .input, .select{
-      border:1px solid rgba(0,0,0,.14);
-      background: rgba(255,255,255,.85);
+      border:1px solid rgba(120,10,30,.18);
+      background: rgba(255,255,255,.92);
       color: var(--text);
       border-radius: 12px;
       padding: 10px 12px;
@@ -183,7 +201,7 @@
       box-shadow: inset 0 0 0 1px rgba(255,255,255,.25);
       min-width: 220px;
     }
-    .input::placeholder{ color: rgba(11,26,16,.45); }
+    .input::placeholder{ color: rgba(42,11,18,.45); }
     .select{ min-width: 160px; cursor:pointer; }
 
     .muted{ color: var(--muted); }
@@ -191,7 +209,7 @@
     .grid{ display:grid; grid-template-columns: 1fr; gap: 12px; margin-top: 12px; }
     .card{
       border:1px solid var(--border);
-      background: linear-gradient(180deg, rgba(255,255,255,.86), rgba(255,255,255,.62));
+      background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.76));
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       backdrop-filter: blur(12px);
@@ -203,8 +221,8 @@
       align-items:center;
       justify-content:space-between;
       gap:12px;
-      border-bottom:1px solid rgba(0,0,0,.08);
-      background: linear-gradient(180deg, rgba(255,255,255,.78), rgba(255,255,255,.58));
+      border-bottom:1px solid rgba(120,10,30,.10);
+      background: linear-gradient(180deg, rgba(255,255,255,.90), rgba(255,255,255,.74));
       flex-wrap: wrap;
     }
     .card .head h2{ margin:0; font-size: 13.5px; letter-spacing:.2px; }
@@ -213,8 +231,8 @@
     .table-wrap{
       overflow:auto;
       border-radius: 14px;
-      border:1px solid rgba(0,0,0,.10);
-      background: rgba(255,255,255,.55);
+      border:1px solid rgba(120,10,30,.12);
+      background: rgba(255,255,255,.62);
     }
     table{
       border-collapse: separate;
@@ -227,32 +245,32 @@
       position: sticky;
       top:0;
       z-index: 2;
-      background: rgba(244,255,248,.98);
-      border-bottom:1px solid rgba(0,0,0,.10);
+      background: rgba(255,246,247,.98);
+      border-bottom:1px solid rgba(120,10,30,.12);
       color: var(--text);
       text-align:left;
       padding: 10px 10px;
       white-space:nowrap;
-      font-weight: 900;
+      font-weight: 950;
       letter-spacing:.12px;
     }
     tbody td{
-      border-bottom: 1px solid rgba(0,0,0,.06);
+      border-bottom: 1px solid rgba(120,10,30,.06);
       padding: 8px 10px;
       vertical-align: top;
       white-space:nowrap;
     }
-    tbody tr:hover{ background: rgba(0,214,122,.06); }
+    tbody tr:hover{ background: rgba(255,59,92,.06); }
 
     .col-driver{
       min-width: 420px;
       position: sticky;
       left:0;
       z-index: 1;
-      background: rgba(244,255,248,.98);
-      border-right:1px solid rgba(0,0,0,.10);
+      background: rgba(255,246,247,.98);
+      border-right:1px solid rgba(120,10,30,.12);
     }
-    thead .col-driver{ z-index: 3; border-right:1px solid rgba(0,0,0,.12); }
+    thead .col-driver{ z-index: 3; border-right:1px solid rgba(120,10,30,.14); }
 
     .driver-title{ display:flex; flex-direction:column; gap:6px; }
     .driver-title .name{ font-weight: 950; letter-spacing:.15px; font-size: 13px; }
@@ -267,12 +285,12 @@
       font-family: var(--mono);
       padding: 2px 6px;
       border-radius: 8px;
-      border:1px solid rgba(0,0,0,.10);
-      background: rgba(255,255,255,.78);
+      border:1px solid rgba(120,10,30,.12);
+      background: rgba(255,255,255,.86);
       color: var(--text);
     }
 
-    /* ====== NOVO: célula Manhã/Tarde ====== */
+    /* Manhã / Tarde */
     .splitCell{
       display:flex;
       flex-direction:column;
@@ -288,14 +306,14 @@
       width: 22px;
       flex: 0 0 22px;
       border-radius: 10px;
-      border:1px solid rgba(0,0,0,.10);
-      background: rgba(255,255,255,.72);
+      border:1px solid rgba(120,10,30,.12);
+      background: rgba(255,255,255,.82);
       font-weight: 950;
       font-size: 11px;
       display:flex;
       align-items:center;
       justify-content:center;
-      color: rgba(11,26,16,.65);
+      color: rgba(42,11,18,.62);
       user-select:none;
     }
 
@@ -305,14 +323,14 @@
       justify-content:flex-start;
       border-radius: 10px;
       padding: 6px 8px;
-      border:1px solid rgba(0,0,0,.10);
-      background: rgba(255,255,255,.80);
+      border:1px solid rgba(120,10,30,.12);
+      background: rgba(255,255,255,.90);
       min-width: 84px;
       cursor:pointer;
       user-select:none;
       transition: transform .06s ease, filter .15s ease;
       max-width: 210px;
-      font-weight: 900;
+      font-weight: 950;
       letter-spacing: .1px;
       line-height: 1.15;
       white-space: normal;
@@ -323,16 +341,16 @@
     .chip:active{ transform: translateY(1px); }
 
     .chip.empty{
-      color: rgba(11,26,16,.40);
+      color: rgba(42,11,18,.40);
       border-style:dashed;
-      background: rgba(255,255,255,.55);
-      font-weight: 800;
+      background: rgba(255,255,255,.66);
+      font-weight: 850;
     }
-    .chip.trabalho{ border-color: var(--chip-trabalho-bd); background: var(--chip-trabalho-bg); box-shadow: 0 0 16px rgba(0,214,122,.10); }
-    .chip.plantao{ border-color: var(--chip-plantao-bd); background: var(--chip-plantao-bg); box-shadow: 0 0 16px rgba(0,212,255,.10); }
-    .chip.ferias{ border-color: var(--chip-ferias-bd); background: var(--chip-ferias-bg); box-shadow: 0 0 16px rgba(161,0,255,.08); }
-    .chip.folga{ border-color: var(--chip-folga-bd); background: var(--chip-folga-bg); box-shadow: 0 0 16px rgba(255,179,0,.10); }
-    .chip.cobertura{ border-color: var(--chip-cobertura-bd); background: var(--chip-cobertura-bg); box-shadow: 0 0 16px rgba(255,47,93,.09); }
+    .chip.trabalho{ border-color: var(--chip-trabalho-bd); background: var(--chip-trabalho-bg); }
+    .chip.plantao{ border-color: var(--chip-plantao-bd); background: var(--chip-plantao-bg); }
+    .chip.ferias{ border-color: var(--chip-ferias-bd); background: var(--chip-ferias-bg); }
+    .chip.folga{ border-color: var(--chip-folga-bd); background: var(--chip-folga-bg); }
+    .chip.cobertura{ border-color: var(--chip-cobertura-bd); background: var(--chip-cobertura-bg); }
 
     /* Drawer */
     .drawer{
@@ -340,9 +358,9 @@
       top:0; right:0;
       width: min(720px, 96vw);
       height: 100%;
-      background: linear-gradient(180deg, rgba(252,255,252,.98), rgba(244,255,248,.96));
-      border-left: 1px solid rgba(0,0,0,.10);
-      box-shadow: -18px 0 40px rgba(0,0,0,.18);
+      background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,246,247,.96));
+      border-left: 1px solid rgba(120,10,30,.12);
+      box-shadow: -18px 0 40px rgba(120,10,30,.18);
       backdrop-filter: blur(14px);
       transform: translateX(105%);
       transition: transform .22s ease;
@@ -356,22 +374,22 @@
       right: 50%;
       transform: translateX(50%);
       width: min(1320px, 98vw);
-      border-left: 1px solid rgba(0,0,0,.10);
+      border-left: 1px solid rgba(120,10,30,.12);
       border-radius: 18px;
       top: 12px;
       height: calc(100% - 24px);
-      box-shadow: 0 18px 60px rgba(0,0,0,.22);
+      box-shadow: 0 18px 60px rgba(120,10,30,.22);
     }
 
     .drawer .d-head{
       padding: 12px 14px;
-      border-bottom: 1px solid rgba(0,0,0,.10);
+      border-bottom: 1px solid rgba(120,10,30,.12);
       display:flex;
       align-items:flex-start;
       justify-content:space-between;
       gap: 12px;
       flex-wrap: wrap;
-      background: rgba(255,255,255,.65);
+      background: rgba(255,255,255,.72);
     }
     .drawer .d-title{ display:flex; flex-direction:column; gap:6px; }
     .drawer .d-title .big{ font-weight: 950; letter-spacing:.15px; font-size: 14px; line-height: 1.2; }
@@ -385,16 +403,16 @@
     .drawer .d-body{ padding: 12px 14px 16px; overflow:auto; flex:1; }
 
     .calendar{
-      border:1px solid rgba(0,0,0,.10);
+      border:1px solid rgba(120,10,30,.12);
       border-radius: 16px;
       overflow:hidden;
-      background: rgba(255,255,255,.85);
+      background: rgba(255,255,255,.90);
     }
     .cal-head{
       display:grid;
       grid-template-columns: repeat(7,1fr);
-      background: rgba(0,214,122,.08);
-      border-bottom:1px solid rgba(0,0,0,.10);
+      background: rgba(255,59,92,.10);
+      border-bottom:1px solid rgba(120,10,30,.12);
     }
     .cal-head div{
       padding: 10px 10px;
@@ -409,43 +427,42 @@
     }
     .day{
       min-height: 120px;
-      border-right:1px solid rgba(0,0,0,.06);
-      border-bottom:1px solid rgba(0,0,0,.06);
+      border-right:1px solid rgba(120,10,30,.06);
+      border-bottom:1px solid rgba(120,10,30,.06);
       padding: 10px 10px;
       display:flex;
       flex-direction:column;
       gap:10px;
       cursor:pointer;
       user-select:none;
-      background: rgba(255,255,255,.90);
+      background: rgba(255,255,255,.92);
     }
     .day:nth-child(7n){ border-right:none; }
     .day .num{
       font-family: var(--mono);
       font-size: 12px;
       color: var(--muted2);
-      font-weight: 900;
+      font-weight: 950;
     }
 
-    /* ✅ CORES NO CALENDÁRIO POR TIPO */
     .day .val{
       display:block;
       align-self:stretch;
       border-radius: 10px;
       padding: 7px 9px;
-      border:1px solid rgba(0,0,0,.10);
-      background: rgba(255,255,255,.86);
+      border:1px solid rgba(120,10,30,.10);
+      background: rgba(255,255,255,.88);
       font-size: 12.5px;
-      font-weight: 900;
+      font-weight: 950;
       white-space: normal;
       word-break: break-word;
       line-height: 1.15;
     }
     .day .val.empty{
       border-style:dashed;
-      background: rgba(255,255,255,.66);
-      color: rgba(11,26,16,.40);
-      font-weight: 800;
+      background: rgba(255,255,255,.70);
+      color: rgba(42,11,18,.40);
+      font-weight: 850;
     }
     .day .val.trabalho{ border-color: var(--chip-trabalho-bd); background: var(--chip-trabalho-bg); }
     .day .val.plantao{ border-color: var(--chip-plantao-bd); background: var(--chip-plantao-bg); }
@@ -453,55 +470,31 @@
     .day .val.folga{ border-color: var(--chip-folga-bd); background: var(--chip-folga-bg); }
     .day .val.cobertura{ border-color: var(--chip-cobertura-bd); background: var(--chip-cobertura-bg); }
 
-    /* NOVO: bloco M/T no calendário */
-    .splitDay{
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-    }
-    .splitDayRow{
-      display:flex;
-      gap:6px;
-      align-items:stretch;
-    }
+    .splitDay{ display:flex; flex-direction:column; gap:6px; }
+    .splitDayRow{ display:flex; gap:6px; align-items:stretch; }
     .splitTag{
       width: 22px;
       flex: 0 0 22px;
       border-radius: 10px;
-      border:1px solid rgba(0,0,0,.10);
-      background: rgba(255,255,255,.72);
+      border:1px solid rgba(120,10,30,.12);
+      background: rgba(255,255,255,.82);
       font-weight: 950;
       font-size: 11px;
       display:flex;
       align-items:center;
       justify-content:center;
-      color: rgba(11,26,16,.65);
+      color: rgba(42,11,18,.62);
     }
 
-    .day:hover{ background: rgba(0,214,122,.08); }
+    .day:hover{ background: rgba(255,59,92,.06); }
     .day.muted{ opacity:.35; cursor: default; background: transparent; }
     .day.muted:hover{ background: transparent; }
 
-    /* Modo de captura */
-    .captureMode{
-      background: #ffffff !important;
-      color: #0b1a10 !important;
-    }
-    .captureMode .card{
-      box-shadow: none !important;
-      border: 1px solid rgba(0,0,0,.14) !important;
-      background: #fff !important;
-    }
-    .captureMode .cal-head{ background: rgba(0,214,122,.18) !important; }
-    .captureMode .calendar{ background: #fff !important; border-color: rgba(0,0,0,.16) !important; }
-    .captureMode .day{ background: #fff !important; border-color: rgba(0,0,0,.12) !important; }
-    .captureMode .day:hover{ background:#fff !important; }
-
-    /* Modal */
+    /* Modais */
     .overlay{
       position: fixed;
       inset:0;
-      background: rgba(0,0,0,.45);
+      background: rgba(40,8,14,.42);
       backdrop-filter: blur(6px);
       display:none;
       align-items:center;
@@ -513,43 +506,33 @@
     .modal{
       width: min(760px, 96vw);
       border-radius: 18px;
-      border:1px solid rgba(0,0,0,.14);
-      background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(245,255,250,.96));
+      border:1px solid rgba(120,10,30,.16);
+      background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,246,247,.96));
       box-shadow: var(--shadow);
       overflow:hidden;
     }
     .modal .m-head{
       padding: 12px 14px;
-      border-bottom:1px solid rgba(0,0,0,.10);
+      border-bottom:1px solid rgba(120,10,30,.12);
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap: 10px;
-      background: rgba(255,255,255,.70);
+      background: rgba(255,255,255,.76);
     }
     .modal .m-head h3{ margin:0; font-size: 14px; letter-spacing:.15px; }
     .modal .m-body{ padding: 12px 14px; }
     .modal .m-actions{
       padding: 12px 14px;
-      border-top:1px solid rgba(0,0,0,.10);
+      border-top:1px solid rgba(120,10,30,.12);
       display:flex;
       justify-content:flex-end;
       gap: 10px;
       flex-wrap: wrap;
-      background: rgba(255,255,255,.70);
+      background: rgba(255,255,255,.76);
     }
-    .row{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-    .row3{
-      display:grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
+    .row{ display:grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+    .row3{ display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; }
     .row .full, .row3 .full{ grid-column: 1 / -1; }
     label{
       display:block;
@@ -557,7 +540,7 @@
       color: var(--muted);
       margin: 0 0 6px;
       letter-spacing:.12px;
-      font-weight: 900;
+      font-weight: 950;
     }
 
     /* Toast */
@@ -567,12 +550,12 @@
       bottom: 16px;
       transform: translateX(-50%);
       background: rgba(255,255,255,.92);
-      border: 1px solid rgba(0,0,0,.14);
-      box-shadow: 0 14px 34px rgba(0,0,0,.16);
+      border: 1px solid rgba(120,10,30,.16);
+      box-shadow: 0 14px 34px rgba(120,10,30,.16);
       padding: 10px 12px;
       border-radius: 14px;
       color: var(--toast);
-      font-weight: 900;
+      font-weight: 950;
       font-size: 12.5px;
       display:none;
       max-width: min(980px, 92vw);
@@ -590,42 +573,36 @@
       padding: 22px 14px;
     }
     .login-card{
-      width: min(540px, 96vw);
+      width: min(560px, 96vw);
       border-radius: 20px;
-      border:1px solid rgba(0,0,0,.14);
-      background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.72));
+      border:1px solid rgba(120,10,30,.16);
+      background: linear-gradient(180deg, rgba(255,255,255,.94), rgba(255,246,247,.80));
       box-shadow: var(--shadow);
       backdrop-filter: blur(14px);
       overflow:hidden;
     }
     .login-head{
       padding: 16px 16px 12px;
-      border-bottom:1px solid rgba(0,0,0,.10);
+      border-bottom:1px solid rgba(120,10,30,.12);
       display:flex;
       gap: 12px;
       align-items:center;
-      background: rgba(255,255,255,.65);
+      background: rgba(255,255,255,.72);
     }
-    .badge{
-      width: 46px; height: 46px;
-      border-radius: 16px;
-      border:1px solid rgba(0,0,0,.12);
-      background:
-        radial-gradient(circle at 30% 30%, rgba(255,255,255,.85), transparent 45%),
-        linear-gradient(135deg, rgba(0,212,255,.16), rgba(0,214,122,.14));
-      box-shadow: var(--glow1), var(--glow3);
+    .login-logo{
+      width: 120px;
+      height: 44px;
+      object-fit: contain;
+      border-radius: 12px;
+      padding: 6px 8px;
+      background: rgba(255,255,255,.92);
+      border: 1px solid rgba(120,10,30,.10);
     }
     .login-head h2{ margin:0; font-size: 15px; letter-spacing:.15px; font-weight: 980; }
     .login-head p{ margin: 4px 0 0; color: var(--muted); font-size: 12.5px; line-height: 1.35; }
     .login-body{ padding: 14px 16px 16px; }
-    .login-actions{
-      display:flex;
-      justify-content:flex-end;
-      gap: 10px;
-      flex-wrap:wrap;
-      padding: 0 16px 16px;
-    }
-    .err{ margin-top: 10px; color: #b0002a; font-size: 12.5px; display:none; font-weight: 900; }
+    .login-actions{ display:flex; justify-content:flex-end; gap: 10px; flex-wrap:wrap; padding: 0 16px 16px; }
+    .err{ margin-top: 10px; color: #b0002a; font-size: 12.5px; display:none; font-weight: 950; }
 
     @media (max-width: 920px){
       .row{ grid-template-columns: 1fr; }
@@ -636,21 +613,11 @@
       .day{ min-height: 110px; }
       .col-driver{ min-width: 380px; }
     }
-
-    @media print{
-      body{ background:#fff !important; }
-      .neon-ring, .topbar, .btn, .actions, .pill, #drawer, #loginView, #toast{ display:none !important; }
-      #appView{ display:block !important; }
-      .wrap{ max-width: 100% !important; padding: 0 !important; }
-      .card{ box-shadow:none !important; }
-      table{ min-width: auto !important; width: 100% !important; }
-      thead th{ position: static !important; }
-    }
   </style>
 </head>
 
 <body>
-  <div class="neon-ring" aria-hidden="true"></div>
+  <div class="bg-art" aria-hidden="true"></div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
@@ -658,9 +625,9 @@
   <section id="loginView" class="login">
     <div class="login-card">
       <div class="login-head">
-        <div class="badge" aria-hidden="true"></div>
+        <img class="login-logo" src="logotipo.png" alt="Pêssego Transportes" />
         <div>
-          <h2>Escala Plantão • Fiscais</h2>
+          <h2>Escala Plantão • Pêssego</h2>
           <p>Login seguro (Supabase). Dados ficam na nuvem.</p>
         </div>
       </div>
@@ -676,7 +643,7 @@
             <input id="loginPass" class="input" type="password" placeholder="••••••••" autocomplete="current-password"/>
           </div>
         </div>
-        <div id="loginErr" class="err">Email ou senha inválidos.</div>
+        <div id="loginErr" class="err">Não foi possível logar.</div>
       </div>
 
       <div class="login-actions">
@@ -690,10 +657,10 @@
     <div class="wrap">
       <div class="topbar">
         <div class="brand">
-          <div class="dot" aria-hidden="true"></div>
+          <img class="brand-logo" src="logotipo.png" alt="Pêssego Transportes" />
           <div>
-            <h1>Escala • Fiscais</h1>
-            <span>Fixos + Plantonistas</span>
+            <h1>Escala • Pêssego Transportes</h1>
+            <span>Fixos + Plantonistas (M/T separado)</span>
           </div>
         </div>
 
@@ -712,7 +679,6 @@
             </select>
           </div>
 
-          <!-- ✅ filtro por linha -->
           <div class="pill">
             <span class="muted" style="font-weight:950;">Linha</span>
             <input id="lineFilter" class="input" placeholder="ex: 3013-10" style="min-width:190px"/>
@@ -723,7 +689,7 @@
             <input id="searchMat" class="input" placeholder="matrícula ou nome" style="min-width:240px"/>
           </div>
 
-          <button id="btnAddDriver" class="btn green">+ Cadastrar fiscal</button>
+          <button id="btnAddDriver" class="btn green">+ Cadastrar</button>
           <button id="btnLogout" class="btn danger">Sair</button>
         </div>
       </div>
@@ -754,8 +720,8 @@
         <div id="dSub" class="sub"></div>
       </div>
       <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
-        <button id="btnWhats" class="btn primary">📲 Baixar calendário (PNG)</button>
-        <button id="btnFull" class="btn purple">🧩 Voltar</button>
+        <button id="btnPng" class="btn primary">📲 Baixar calendário (PNG)</button>
+        <button id="btnFull" class="btn">🖥️ Tela cheia</button>
         <button id="btnEditDriver" class="btn green">✏️ Editar</button>
         <button id="btnRemoveDriver" class="btn danger">Remover</button>
         <button id="btnCloseDrawer" class="btn">Fechar</button>
@@ -785,7 +751,7 @@
   <div id="addOverlay" class="overlay" role="dialog" aria-modal="true">
     <div class="modal">
       <div class="m-head">
-        <h3 id="driverModalTitle">Cadastrar fiscal</h3>
+        <h3 id="driverModalTitle">Cadastrar</h3>
         <button id="btnCloseAdd" class="btn">Fechar</button>
       </div>
       <div class="m-body">
@@ -809,7 +775,7 @@
 
           <div>
             <label>Telefone (WhatsApp)</label>
-            <input id="inPhone" class="input" placeholder="ex: 11 98767-4890 (ou +55 11 98767-4890)" />
+            <input id="inPhone" class="input" placeholder="ex: 11 98767-4890" />
           </div>
 
           <div>
@@ -818,7 +784,7 @@
           </div>
 
           <div>
-            <label>TP / TS / Circular (local do fixo)</label>
+            <label>TP / TS / Circular</label>
             <select id="inPontaBase" class="select">
               <option value="">(vazio)</option>
               <option value="TP">TP</option>
@@ -852,12 +818,12 @@
           <div class="full">
             <label>Aplicar em</label>
             <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-              <label style="margin:0; font-weight:900; color:var(--text); display:flex; gap:8px; align-items:center;">
+              <label style="margin:0; font-weight:950; color:var(--text); display:flex; gap:8px; align-items:center;">
                 <input type="radio" name="applyMode" id="applySingle" checked />
                 Somente este dia
               </label>
 
-              <label style="margin:0; font-weight:900; color:var(--text); display:flex; gap:8px; align-items:center;">
+              <label style="margin:0; font-weight:950; color:var(--text); display:flex; gap:8px; align-items:center;">
                 <input type="radio" name="applyMode" id="applyRange" />
                 Data inicial e final
               </label>
@@ -876,7 +842,7 @@
           </div>
           <div class="full">
             <div class="muted" style="font-size:12px;">
-              Para aplicar em vários dias, selecione o <b>Código do 7º dia</b> (50001–50040). Ele aparecerá somente no 7º dia.
+              Regra do 7º dia: após 6 dias seguidos, no 7º dia é obrigatório escolher um código (50001–50040).
             </div>
           </div>
         </div>
@@ -893,7 +859,6 @@
             </select>
           </div>
 
-          <!-- ✅ NOVO: período -->
           <div>
             <label>Período</label>
             <select id="ePeriod" class="select">
@@ -925,16 +890,26 @@
 
           <div>
             <label>Código do 7º dia</label>
-            <select id="eCode7" class="select">
-              <option value="">(selecionar)</option>
-            </select>
+            <select id="eCode7" class="select"></select>
           </div>
 
           <div class="full" id="coverBox" style="display:none;">
             <label>Quem irá cobrir (somente plantonistas)</label>
-            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
               <select id="eCoverSelect" class="select" style="min-width: 330px;"></select>
               <button id="btnClearCover" class="btn">Limpar</button>
+            </div>
+
+            <!-- ✅ Tempo indeterminado -->
+            <div style="margin-top:10px; display:flex; gap:10px; align-items:flex-start; flex-wrap:wrap;">
+              <label style="margin:0; font-weight:950; color:var(--text); display:flex; gap:8px; align-items:center;">
+                <input type="checkbox" id="eOpenCover" />
+                Tempo indeterminado (sem data de retorno)
+              </label>
+              <div class="muted" style="font-size:12px; line-height:1.25;">
+                Se marcar, o sistema preenche automaticamente até o fim do mês atual. No retorno, coloque “Trabalho/Plantão”
+                no dia que voltou que ele limpa os próximos dias auto-criados.
+              </div>
             </div>
           </div>
 
@@ -952,255 +927,151 @@
     </div>
   </div>
 
-  <script type="module">
-    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-    const SUPABASE_URL = "https://cwqwugdiksfodeoksofp.supabase.co";
+  <script>
+    /* ======================
+       CONFIG SUPABASE
+       ====================== */
+    const SUPABASE_URL  = "https://cwqwugdiksfodeoksofp.supabase.co";
     const SUPABASE_ANON = "sb_publishable_XkISoiXR_cHRWdeKvtb7HA_ceYFTnPR";
-    const ADMIN_EMAIL = "darlene.plantao@pessegotransportes.com.br";
-
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON, {
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON, {
       auth: { persistSession: true, autoRefreshToken: true }
     });
 
-    let state = {
-      drivers: [],
-      entriesByDriver: {},
-      selectedMonth: null,
-      selectedDriverId: null,
-      searchText: "",
-      roleFilter: "todos",
-      lineFilterText: "",
-    };
-
-    let isBusy = false;
-
+    /* ======================
+       HELPERS
+       ====================== */
     const pad2 = n => String(n).padStart(2,"0");
     const ymd = (y,m,d) => `${y}-${pad2(m)}-${pad2(d)}`;
+    const toDate = (s) => { const [Y,M,D]=s.split("-").map(Number); return new Date(Y,M-1,D); };
+    const addDays = (dt,n)=>{ const d=new Date(dt); d.setDate(d.getDate()+n); return d; };
+    const daysInMonth = (dt) => new Date(dt.getFullYear(), dt.getMonth()+1, 0).getDate();
     const monthKey = (y,m) => `${y}-${pad2(m)}`;
-    const parseMonthKey = (mk) => {
-      const [y,m] = mk.split("-").map(Number);
-      return new Date(y, m-1, 1);
+    const escapeHtml = (str)=>String(str||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
+    const fmtNiceDate = (s)=>{ const [y,m,d]=s.split("-"); return `${d}/${m}/${y}`; };
+    const firstName = (full)=>String(full||"").trim().split(/\s+/)[0]||"";
+    const normalizePonta = (p)=>{
+      const raw=String(p||"").trim(); const v=raw.toUpperCase();
+      if(v==="TP"||v==="TS") return v;
+      if(v==="CIRCULAR"||v==="CIRC") return "Circular";
+      if(raw.toLowerCase()==="circular") return "Circular";
+      return "";
     };
-    const daysInMonth = (date) => new Date(date.getFullYear(), date.getMonth()+1, 0).getDate();
-    const dowShort = ["DOM","SEG","TER","QUA","QUI","SEX","SAB"];
-
-    const WORK_KINDS = new Set(["trabalho","plantao","cobertura"]);
-    const CODE7_MIN = 50001;
-    const CODE7_MAX = 50040;
-
-    function escapeHtml(str){
-      return String(str || "")
-        .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;").replaceAll("'","&#039;");
-    }
-
-    function fmtNiceDate(dateStr){
-      const [y,m,d] = dateStr.split("-");
-      return `${d}/${m}/${y}`;
-    }
-
-    function firstName(full){
-      const s = String(full || "").trim();
-      if(!s) return "";
-      return s.split(/\s+/)[0];
-    }
-
-    function shortPerson(drv){
-      if(!drv) return "";
-      return `${drv.mat} ${firstName(drv.name)}`.trim();
-    }
-
-    function normalizePonta(p){
-      const raw = String(p || "").trim();
-      const v = raw.toUpperCase();
-      if(v === "TP" || v === "TS") return v;
-      if(v === "CIRCULAR" || v === "CIRC") return "Circular";
-      if(raw.toLowerCase() === "circular") return "Circular";
-      return "";
-    }
-
-    function extractCode7FromNotes(notes){
-      const s = String(notes || "");
-      const m = s.match(/\[C7:(\d{5})\]/);
+    const timeToPeriod = (hhmm)=>{
+      const m = String(hhmm||"").trim().match(/^(\d{1,2}):(\d{2})$/);
       if(!m) return "";
-      const n = Number(m[1]);
-      if(Number.isFinite(n) && n>=CODE7_MIN && n<=CODE7_MAX) return String(n);
-      return "";
-    }
-    function removeCode7Marker(notes){
-      return String(notes || "").replace(/\s*\[C7:\d{5}\]\s*/g, " ").replace(/\s{2,}/g," ").trim();
-    }
-    function addCode7Marker(notes, code){
-      const clean = removeCode7Marker(notes);
-      if(!code) return clean || "";
-      return `${(clean||"").trim()}${clean ? " " : ""}[C7:${code}]`.trim();
-    }
-
-    /* ===== NOVO: marcador de período =====
-      [P:M] manhã
-      [P:T] tarde
-      [P:I] integral
-    */
-    function extractPeriodFromNotes(notes){
-      const s = String(notes || "");
-      const m = s.match(/\[P:(M|T|I)\]/i);
-      if(!m) return "";
-      return String(m[1]).toUpperCase();
-    }
-    function removePeriodMarker(notes){
-      return String(notes || "").replace(/\s*\[P:(M|T|I)\]\s*/gi, " ").replace(/\s{2,}/g," ").trim();
-    }
-    function addPeriodMarker(notes, period){
-      const clean = removePeriodMarker(notes);
-      const p = String(period || "").toUpperCase();
-      if(p !== "M" && p !== "T" && p !== "I") return clean || "";
-      return `${(clean||"").trim()}${clean ? " " : ""}[P:${p}]`.trim();
-    }
-
-    function timeToPeriod(time_hhmm){
-      const t = String(time_hhmm || "").trim();
-      const m = t.match(/^(\d{1,2}):(\d{2})$/);
-      if(!m) return "";
-      const hh = Number(m[1]);
-      const mm = Number(m[2]);
-      if(!Number.isFinite(hh) || !Number.isFinite(mm)) return "";
-      const total = hh*60 + mm;
+      const hh=Number(m[1]), mm=Number(m[2]);
+      const total=hh*60+mm;
       return total < 12*60 ? "M" : "T";
-    }
+    };
 
-    function effectivePeriod(entry){
-      if(!entry) return "";
-      const kind = (entry.kind || "").toLowerCase().trim();
-      if(kind === "folga" || kind === "ferias") return "I"; // dia todo
-      const fromNotes = extractPeriodFromNotes(entry.notes || "");
+    /* ======================
+       MARCADORES EM NOTES
+       ====================== */
+    const CODE7_MIN = 50001, CODE7_MAX = 50040;
+    const WORK_KINDS = new Set(["trabalho","plantao","cobertura"]);
+
+    const extractCode7FromNotes = (notes)=>{
+      const m = String(notes||"").match(/\[C7:(\d{5})\]/);
+      if(!m) return "";
+      const n=Number(m[1]);
+      return (Number.isFinite(n)&&n>=CODE7_MIN&&n<=CODE7_MAX) ? String(n) : "";
+    };
+    const removeMarker = (notes, re)=>String(notes||"").replace(re," ").replace(/\s{2,}/g," ").trim();
+    const removeCode7Marker = (notes)=>removeMarker(notes, /\s*\[C7:\d{5}\]\s*/g);
+    const addCode7Marker = (notes, code)=>{
+      const clean = removeCode7Marker(notes);
+      return code ? `${clean}${clean?" ":""}[C7:${code}]`.trim() : (clean||"");
+    };
+
+    const extractPeriodFromNotes = (notes)=>{
+      const m = String(notes||"").match(/\[P:(M|T|I)\]/i);
+      return m ? String(m[1]).toUpperCase() : "";
+    };
+    const removePeriodMarker = (notes)=>removeMarker(notes, /\s*\[P:(M|T|I)\]\s*/gi);
+    const addPeriodMarker = (notes, p)=>{
+      const clean = removePeriodMarker(notes);
+      const P = String(p||"").toUpperCase();
+      if(!["M","T","I"].includes(P)) return clean||"";
+      return `${clean}${clean?" ":""}[P:${P}]`.trim();
+    };
+
+    /* ===== Cobertura indeterminada =====
+       [COVOPEN:<id>] = marcou início da cobertura indeterminada (no titular)
+       [AUTO:COV]     = dias auto gerados
+       [COVSRC:<id>]  = no cobridor (opcional, para rastrear)
+    */
+    const extractCovOpenId = (notes)=>{
+      const m = String(notes||"").match(/\[COVOPEN:(\d+)\]/i);
+      return m ? String(m[1]) : "";
+    };
+    const removeCovOpen = (notes)=>removeMarker(notes, /\s*\[COVOPEN:\d+\]\s*/gi);
+    const addCovOpen = (notes, id)=>{
+      const clean = removeCovOpen(notes);
+      return id ? `${clean}${clean?" ":""}[COVOPEN:${id}]`.trim() : (clean||"");
+    };
+    const hasAutoCov = (notes)=>/\[AUTO:COV\]/i.test(String(notes||""));
+    const removeAutoCov = (notes)=>removeMarker(notes, /\s*\[AUTO:COV\]\s*/gi);
+    const addAutoCov = (notes)=>{
+      const s=String(notes||"").trim();
+      return /\[AUTO:COV\]/i.test(s) ? s : `${s}${s?" ":""}[AUTO:COV]`.trim();
+    };
+    const addCovSrc = (notes, id)=>{
+      const clean = removeMarker(notes, /\s*\[COVSRC:\d+\]\s*/gi);
+      return id ? `${clean}${clean?" ":""}[COVSRC:${id}]`.trim() : clean;
+    };
+
+    const effectivePeriod = (entry)=>{
+      const k = String(entry?.kind||"").toLowerCase().trim();
+      if(k==="folga"||k==="ferias") return "I";
+      const fromNotes = extractPeriodFromNotes(entry?.notes||"");
       if(fromNotes) return fromNotes;
-      const byTime = timeToPeriod(entry.time_hhmm || "");
-      return byTime || "M"; // padrão manhã se não tiver nada
-    }
+      const byTime = timeToPeriod(entry?.time_hhmm||"");
+      return byTime || "M";
+    };
 
-    function entryToLines(entry){
+    const chipClass = (entry)=>{
+      if(!entry) return "chip empty";
+      const k = String(entry.kind||"").toLowerCase().trim();
+      if(k==="trabalho") return "chip trabalho";
+      if(k==="plantao") return "chip plantao";
+      if(k==="ferias") return "chip ferias";
+      if(k==="folga") return "chip folga";
+      if(k==="cobertura") return "chip cobertura";
+      return "chip trabalho";
+    };
+    const calValClass = (entry)=>{
+      if(!entry) return "val empty";
+      const k = String(entry.kind||"").toLowerCase().trim();
+      if(k==="trabalho") return "val trabalho";
+      if(k==="plantao") return "val plantao";
+      if(k==="ferias") return "val ferias";
+      if(k==="folga") return "val folga";
+      if(k==="cobertura") return "val cobertura";
+      return "val trabalho";
+    };
+
+    const entryToLines = (entry)=>{
       if(!entry) return [];
+      const kind = String(entry.kind||"trabalho").toLowerCase().trim();
+      const line = String(entry.line||"").trim();
+      const time = String(entry.time_hhmm||"").trim();
+      const ponta = normalizePonta(entry.ponta||"");
+      const code7 = entry.code7 || extractCode7FromNotes(entry.notes||"");
 
-      const kind = (entry.kind || "trabalho").toLowerCase().trim();
-      const line = (entry.line || "").trim();
-      const time = (entry.time_hhmm || "").trim();
-      const ponta = normalizePonta(entry.ponta || "");
-      const code7 = entry.code7 || extractCode7FromNotes(entry.notes || "");
+      if(kind==="folga") return ["Folga"];
+      if(kind==="ferias") return ["Férias"];
 
-      if(kind === "folga") return ["Folga"];
-      if(kind === "ferias") return ["Férias"];
-
-      const parts = [];
+      const parts=[];
       if(line) parts.push(line);
       if(time) parts.push(time);
       if(ponta) parts.push(ponta);
       if(code7) parts.push(code7);
 
-      if(parts.length === 0){
-        if(kind === "plantao") return ["Plantão"];
-        return ["Trabalho"];
-      }
+      if(parts.length===0) return [kind==="plantao" ? "Plantão" : (kind==="cobertura" ? "Cobertura" : "Trabalho")];
       return parts;
-    }
+    };
 
-    function linesToHtml(lines){
-      if(!lines || !lines.length) return "";
-      return lines.map(x => escapeHtml(x)).join("<br/>");
-    }
-
-    function chipClass(entry){
-      if(!entry) return "chip empty";
-      const k = (entry.kind || "").toLowerCase().trim();
-      if(k === "trabalho") return "chip trabalho";
-      if(k === "plantao") return "chip plantao";
-      if(k === "ferias") return "chip ferias";
-      if(k === "folga") return "chip folga";
-      if(k === "cobertura") return "chip cobertura";
-      return "chip trabalho";
-    }
-
-    function calendarValClass(entry){
-      if(!entry) return "val empty";
-      const k = (entry.kind || "").toLowerCase().trim();
-      if(k === "trabalho") return "val trabalho";
-      if(k === "plantao") return "val plantao";
-      if(k === "ferias") return "val ferias";
-      if(k === "folga") return "val folga";
-      if(k === "cobertura") return "val cobertura";
-      return "val trabalho";
-    }
-
-    function normalizePhoneBR(phone){
-      const digits = String(phone || "").replace(/\D/g, "");
-      if(!digits) return "";
-      if(digits.startsWith("55")) return digits;
-      if(digits.length >= 10) return "55" + digits;
-      return digits;
-    }
-
-    function buildWhatsappText(driver, monthDate){
-      const y = monthDate.getFullYear();
-      const m = monthDate.getMonth() + 1;
-      const mes = pad2(m);
-      return `Olá ${driver.name}! Segue sua escala mensal do mês ${mes}/${y}. (Imagem em anexo)`;
-    }
-
-    function openWhatsApp(phoneDigits, text){
-      const encoded = encodeURIComponent(text);
-      const url = `https://wa.me/${phoneDigits}?text=${encoded}`;
-      window.open(url, "_blank", "noopener,noreferrer");
-    }
-
-    async function captureCalendarImage(){
-      const el = document.getElementById("calCapture");
-      if(!el) throw new Error("Elemento do calendário não encontrado.");
-
-      drawer.classList.add("fullscreen");
-      btnFull.textContent = "🧩 Voltar";
-      drawer.scrollTop = 0;
-
-      el.classList.add("captureMode");
-      await new Promise(r => setTimeout(r, 120));
-
-      const canvas = await html2canvas(el, {
-        backgroundColor: "#ffffff",
-        scale: 2.2,
-        useCORS: true,
-        windowWidth: document.documentElement.clientWidth,
-        windowHeight: document.documentElement.clientHeight
-      });
-
-      el.classList.remove("captureMode");
-
-      return new Promise((resolve) => {
-        canvas.toBlob((blob) => resolve(blob), "image/png", 1.0);
-      });
-    }
-
-    async function tryCopyImageToClipboard(blob){
-      try{
-        if(!navigator.clipboard || !window.ClipboardItem) return false;
-        await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
-        return true;
-      }catch(e){
-        return false;
-      }
-    }
-
-    function downloadBlob(blob, filename){
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 6000);
-    }
-
-    function show(el){ el.classList.remove("hidden"); }
-    function hide(el){ el.classList.add("hidden"); }
+    const linesToHtml = (lines)=>lines.map(x=>escapeHtml(x)).join("<br/>");
 
     function toast(msg, ms=4200){
       const t = document.getElementById("toast");
@@ -1210,48 +1081,91 @@
       toast._timer = setTimeout(()=> t.classList.remove("show"), ms);
     }
 
-    function setBusy(v){
-      isBusy = v;
-      btnLogin.disabled = v;
-      btnAddDriver.disabled = v;
-      btnLogout.disabled = v;
-      btnSaveDriver.disabled = v;
-      btnSaveDay.disabled = v;
-      btnClearDay.disabled = v;
-      btnRemoveDriver.disabled = v;
-      btnWhats.disabled = v;
-      btnEditDriver.disabled = v;
-      btnCloseEdit.disabled = v;
-      btnCloseAdd.disabled = v;
+    function withinSelectedMonth(state, dateStr){
+      const dt = toDate(dateStr);
+      return dt.getFullYear()===state.selectedMonth.getFullYear() && dt.getMonth()===state.selectedMonth.getMonth();
     }
 
-    function isValidCode7(code){
-      const n = Number(code);
-      return Number.isFinite(n) && n>=CODE7_MIN && n<=CODE7_MAX;
+    function buildRangeDates(startStr, endStr){
+      const s = toDate(startStr);
+      const e = toDate(endStr);
+      if(e < s) return [];
+      const out=[];
+      let cur = new Date(s);
+      while(cur <= e){
+        out.push(ymd(cur.getFullYear(), cur.getMonth()+1, cur.getDate()));
+        cur = addDays(cur, 1);
+      }
+      return out;
     }
 
-    function dateToYmd(d){
-      const y = d.getFullYear();
-      const m = d.getMonth()+1;
-      const day = d.getDate();
-      return ymd(y,m,day);
+    function monthStartEnd(monthDate){
+      const y = monthDate.getFullYear();
+      const m = monthDate.getMonth()+1;
+      const startStr = `${y}-${pad2(m)}-01`;
+      const endStr = `${y}-${pad2(m)}-${pad2(daysInMonth(monthDate))}`;
+      return { startStr, endStr, y, m };
     }
 
-    function addDays(date, n){
-      const d = new Date(date);
-      d.setDate(d.getDate()+n);
-      return d;
+    /* ======================
+       DB helpers
+       ====================== */
+    async function dbGetDrivers(){
+      const { data, error } = await supabase
+        .from("drivers")
+        .select("*")
+        .order("mat", { ascending: true });
+      if(error) throw error;
+      return data || [];
     }
 
-    function toDate(ymdStr){
-      const [y,m,d] = ymdStr.split("-").map(Number);
-      return new Date(y, m-1, d);
+    async function dbInsertDriver(driver){
+      const { data, error } = await supabase.from("drivers").insert(driver).select("*").single();
+      if(error) throw error;
+      return data;
     }
 
-    function withinSelectedMonth(ymdStr){
-      const dt = toDate(ymdStr);
-      return dt.getFullYear() === state.selectedMonth.getFullYear()
-        && dt.getMonth() === state.selectedMonth.getMonth();
+    async function dbUpdateDriver(id, patch){
+      const { data, error } = await supabase.from("drivers").update(patch).eq("id", id).select("*").single();
+      if(error) throw error;
+      return data;
+    }
+
+    async function dbDeleteDriver(id){
+      const { error } = await supabase.from("drivers").delete().eq("id", id);
+      if(error) throw error;
+    }
+
+    async function dbGetEntriesForMonth(monthDate){
+      const { startStr, endStr } = monthStartEnd(monthDate);
+      const { data, error } = await supabase
+        .from("schedule_entries")
+        .select("id,driver_id,work_date,kind,line,time_hhmm,covered_by_driver_id,notes,ponta")
+        .gte("work_date", startStr)
+        .lte("work_date", endStr);
+      if(error) throw error;
+      return data || [];
+    }
+
+    async function dbGetEntry(driverId, dateStr){
+      const { data, error } = await supabase
+        .from("schedule_entries")
+        .select("id,driver_id,work_date,kind,line,time_hhmm,covered_by_driver_id,notes,ponta")
+        .eq("driver_id", driverId)
+        .eq("work_date", dateStr)
+        .maybeSingle();
+      if(error) throw error;
+      return data || null;
+    }
+
+    async function dbUpsertEntry(payload){
+      const { error } = await supabase.from("schedule_entries").upsert(payload, { onConflict: "driver_id,work_date" });
+      if(error) throw error;
+    }
+
+    async function dbDeleteEntry(driverId, dateStr){
+      const { error } = await supabase.from("schedule_entries").delete().eq("driver_id", driverId).eq("work_date", dateStr);
+      if(error) throw error;
     }
 
     async function dbGetEntriesRange(driverId, startYmd, endYmd){
@@ -1265,14 +1179,28 @@
       return data || [];
     }
 
-    function getEntryFromState(driverId, dateStr){
-      return state.entriesByDriver?.[driverId]?.[dateStr] || null;
+    async function dbGetOpenCoverageStartsWindow(monthDate){
+      const { endStr } = monthStartEnd(monthDate);
+      const startWindow = addDays(toDate(endStr), -365);
+      const startStr = ymd(startWindow.getFullYear(), startWindow.getMonth()+1, startWindow.getDate());
+
+      const { data, error } = await supabase
+        .from("schedule_entries")
+        .select("driver_id,work_date,kind,line,time_hhmm,notes,ponta,covered_by_driver_id")
+        .gte("work_date", startStr)
+        .lte("work_date", endStr)
+        .ilike("notes", "%[COVOPEN:%");
+      if(error) throw error;
+      return data || [];
     }
 
-    async function loadBackEntriesForStreak(driverId, dateStr){
+    /* ======================
+       Regras de 7º dia
+       ====================== */
+    async function loadBackEntriesForStreak(state, driverId, dateStr){
       const dt = toDate(dateStr);
-      const start = dateToYmd(addDays(dt, -10));
-      const end = dateToYmd(addDays(dt, -1));
+      const start = ymd(addDays(dt,-10).getFullYear(), addDays(dt,-10).getMonth()+1, addDays(dt,-10).getDate());
+      const end = ymd(addDays(dt,-1).getFullYear(), addDays(dt,-1).getMonth()+1, addDays(dt,-1).getDate());
       const rows = await dbGetEntriesRange(driverId, start, end);
       const map = {};
       for(const r of rows){
@@ -1289,17 +1217,21 @@
       return map;
     }
 
-    async function computeStreakBefore(driverId, dateStr){
-      const backMap = await loadBackEntriesForStreak(driverId, dateStr);
+    function getEntryFromState(state, driverId, dateStr){
+      return state.entriesByDriver?.[driverId]?.[dateStr] || null;
+    }
 
+    async function computeStreakBefore(state, driverId, dateStr){
+      const backMap = await loadBackEntriesForStreak(state, driverId, dateStr);
       let streak = 0;
       for(let i=1; i<=12; i++){
-        const prev = dateToYmd(addDays(toDate(dateStr), -i));
-        const entry = getEntryFromState(driverId, prev) || backMap[prev] || null;
+        const prevDt = addDays(toDate(dateStr), -i);
+        const prev = ymd(prevDt.getFullYear(), prevDt.getMonth()+1, prevDt.getDate());
+        const entry = getEntryFromState(state, driverId, prev) || backMap[prev] || null;
         if(!entry) break;
 
-        const kind = (entry.kind || "").toLowerCase().trim();
-        const code7 = entry.code7 || extractCode7FromNotes(entry.notes || "");
+        const kind = String(entry.kind||"").toLowerCase().trim();
+        const code7 = entry.code7 || extractCode7FromNotes(entry.notes||"");
         if(code7) break;
 
         if(WORK_KINDS.has(kind)) streak++;
@@ -1308,61 +1240,167 @@
       return streak;
     }
 
-    function todaysYmd(){
-      const now = new Date();
-      return ymd(now.getFullYear(), now.getMonth()+1, now.getDate());
+    function isValidCode7(code){
+      const n = Number(code);
+      return Number.isFinite(n) && n>=CODE7_MIN && n<=CODE7_MAX;
     }
 
-    function statusForDriverToday(driverId){
-      const today = todaysYmd();
-      const entry = state.entriesByDriver?.[driverId]?.[today] || null;
-      if(!entry) return "Disponível";
-      const k = (entry.kind || "").toLowerCase().trim();
-      if(k === "trabalho") return "Trabalhando";
-      if(k === "plantao") return "Plantão";
-      if(k === "ferias") return "Férias";
-      if(k === "folga") return "Folga";
-      if(k === "cobertura") return "Trabalhando";
-      return "Disponível";
-    }
+    /* ======================
+       Cobertura indeterminada (auto preenche / auto limpa)
+       ====================== */
+    async function clearFutureAutoCoverageInMonth(state, ownerId, fromDateStr, coverId){
+      const { endStr } = monthStartEnd(state.selectedMonth);
+      const dates = buildRangeDates(fromDateStr, endStr);
 
-    function findFixedDoubleFolgaConflicts(ymdList){
-      const dates = new Set(ymdList || []);
-      const fixos = state.drivers.filter(d => (d.role||"").toLowerCase().trim() === "fixo");
-
-      const conflicts = [];
-      for(const dateStr of dates){
-        const byLine = new Map();
-        for(const f of fixos){
-          const line = (f.line_default || "").trim();
-          if(!line) continue;
-          const e = state.entriesByDriver?.[f.id]?.[dateStr] || null;
-          const k = (e?.kind || "").toLowerCase().trim();
-          if(k !== "folga") continue;
-
-          if(!byLine.has(line)) byLine.set(line, []);
-          byLine.get(line).push(f.mat || "");
+      for(const d of dates){
+        const eOwner = await dbGetEntry(ownerId, d);
+        if(eOwner && hasAutoCov(eOwner.notes || "")){
+          await dbDeleteEntry(ownerId, d);
         }
-        for(const [line, mats] of byLine.entries()){
-          if(mats.length >= 2){
-            conflicts.push({ date: dateStr, line, mats: mats.filter(Boolean) });
+        if(coverId){
+          const eCov = await dbGetEntry(coverId, d);
+          if(eCov && hasAutoCov(eCov.notes || "")){
+            await dbDeleteEntry(coverId, d);
           }
         }
       }
-      return conflicts;
     }
 
-    function notifyConflicts(conflicts){
-      if(!conflicts.length) return;
-      const first = conflicts[0];
-      const msg =
-        conflicts.length === 1
-          ? `Atenção: 2 fixos da linha ${first.line} estão de folga em ${fmtNiceDate(first.date)} (${first.mats.join(", ")}).`
-          : `Atenção: existem ${conflicts.length} casos de 2 fixos da mesma linha em folga no mesmo dia.`;
-      toast(msg, 6500);
+    async function applyOpenCoverageFromStartToEndOfMonth(state, ownerId, startDateStr, kind, line, time_hhmm, ponta, coverId){
+      const { endStr } = monthStartEnd(state.selectedMonth);
+      const dates = buildRangeDates(startDateStr, endStr);
+
+      for(const d of dates){
+        const existsOwner = await dbGetEntry(ownerId, d);
+        if(!existsOwner){
+          let n = addAutoCov("");
+          n = addPeriodMarker(n, "I");
+          await dbUpsertEntry({
+            driver_id: ownerId,
+            work_date: d,
+            kind,
+            line: line || null,
+            time_hhmm: time_hhmm || null,
+            covered_by_driver_id: coverId || null,
+            notes: n || null,
+            ponta: ponta || null
+          });
+        }
+
+        if(coverId){
+          const existsCov = await dbGetEntry(coverId, d);
+          if(!existsCov){
+            let cn = addAutoCov("");
+            cn = addPeriodMarker(cn, "I");
+            cn = addCovSrc(cn, ownerId);
+            await dbUpsertEntry({
+              driver_id: coverId,
+              work_date: d,
+              kind: "cobertura",
+              line: line || null,
+              time_hhmm: time_hhmm || null,
+              covered_by_driver_id: null,
+              notes: cn || null,
+              ponta: ponta || null
+            });
+          }
+        }
+      }
     }
 
-    /* DOM */
+    async function applyAllOpenCoveragesForSelectedMonth(state){
+      const rows = await dbGetOpenCoverageStartsWindow(state.selectedMonth);
+      if(!rows.length) return;
+
+      const { startStr, endStr } = monthStartEnd(state.selectedMonth);
+
+      // pega o último COVOPEN por titular
+      const latestByOwner = new Map();
+      for(const r of rows){
+        const ownerId = r.driver_id;
+        const dateStr = r.work_date;
+        const coverId = extractCovOpenId(r.notes || "");
+        const kind = String(r.kind||"").toLowerCase().trim();
+        if((kind !== "folga" && kind !== "ferias") || !coverId) continue;
+
+        const prev = latestByOwner.get(ownerId);
+        if(!prev || prev.work_date < dateStr) latestByOwner.set(ownerId, r);
+      }
+
+      for(const [ownerId, startRow] of latestByOwner.entries()){
+        const startDateStr = startRow.work_date;
+        if(startDateStr > endStr) continue;
+
+        const coverId = extractCovOpenId(startRow.notes || "");
+        const kind = String(startRow.kind||"").toLowerCase().trim();
+        const line = (startRow.line || "").trim() || null;
+        const time_hhmm = (startRow.time_hhmm || "").trim() || null;
+        const ponta = startRow.ponta || null;
+
+        const fillStart = (startDateStr < startStr) ? startStr : startDateStr;
+        const dates = buildRangeDates(fillStart, endStr);
+
+        for(const d of dates){
+          const eOwner = await dbGetEntry(ownerId, d);
+
+          // se o titular tiver um dia manual diferente de folga/férias, considera retorno e para
+          if(eOwner){
+            const k = String(eOwner.kind||"").toLowerCase().trim();
+            if(k !== "folga" && k !== "ferias" && !hasAutoCov(eOwner.notes || "")){
+              break;
+            }
+          }
+
+          if(!eOwner){
+            let n = addAutoCov("");
+            n = addPeriodMarker(n, "I");
+            await dbUpsertEntry({
+              driver_id: ownerId,
+              work_date: d,
+              kind,
+              line,
+              time_hhmm,
+              covered_by_driver_id: coverId || null,
+              notes: n || null,
+              ponta
+            });
+          }
+
+          if(coverId){
+            const eCov = await dbGetEntry(coverId, d);
+            if(!eCov){
+              let cn = addAutoCov("");
+              cn = addPeriodMarker(cn, "I");
+              cn = addCovSrc(cn, ownerId);
+              await dbUpsertEntry({
+                driver_id: coverId,
+                work_date: d,
+                kind: "cobertura",
+                line,
+                time_hhmm,
+                covered_by_driver_id: null,
+                notes: cn || null,
+                ponta
+              });
+            }
+          }
+        }
+      }
+    }
+
+    /* ======================
+       STATE + DOM
+       ====================== */
+    const state = {
+      drivers: [],
+      entriesByDriver: {},
+      selectedMonth: null,
+      selectedDriverId: null,
+      searchText: "",
+      roleFilter: "todos",
+      lineFilterText: "",
+    };
+
     const loginView = document.getElementById("loginView");
     const appView = document.getElementById("appView");
     const loginEmail = document.getElementById("loginEmail");
@@ -1385,7 +1423,7 @@
     const btnRemoveDriver = document.getElementById("btnRemoveDriver");
     const btnEditDriver = document.getElementById("btnEditDriver");
     const btnFull = document.getElementById("btnFull");
-    const btnWhats = document.getElementById("btnWhats");
+    const btnPng = document.getElementById("btnPng");
     const dName = document.getElementById("dName");
     const dSub = document.getElementById("dSub");
     const calGrid = document.getElementById("calGrid");
@@ -1425,738 +1463,23 @@
     const coverBox = document.getElementById("coverBox");
     const eCoverSelect = document.getElementById("eCoverSelect");
     const btnClearCover = document.getElementById("btnClearCover");
+    const eOpenCover = document.getElementById("eOpenCover");
 
+    let isBusy = false;
     let editCtx = { driverId:null, dateStr:null };
     let driverFormMode = { mode:"create", driverId:null };
 
-    /* DB */
-    async function dbGetDrivers(){
-      const { data, error } = await supabase
-        .from("drivers")
-        .select("*")
-        .order("mat", { ascending: true });
-      if(error) throw error;
-      return data || [];
+    function show(el){ el.classList.remove("hidden"); }
+    function hide(el){ el.classList.add("hidden"); }
+
+    function setBusy(v){
+      isBusy = v;
+      [
+        btnLogin, btnAddDriver, btnLogout, btnSaveDriver, btnSaveDay, btnClearDay,
+        btnRemoveDriver, btnPng, btnEditDriver, btnCloseEdit, btnCloseAdd
+      ].forEach(b => { if(b) b.disabled = v; });
     }
 
-    async function dbInsertDriver(driver){
-      const { data, error } = await supabase
-        .from("drivers")
-        .insert(driver)
-        .select("*")
-        .single();
-      if(error) throw error;
-      return data;
-    }
-
-    async function dbUpdateDriver(driverId, patch){
-      const { data, error } = await supabase
-        .from("drivers")
-        .update(patch)
-        .eq("id", driverId)
-        .select("*")
-        .single();
-      if(error) throw error;
-      return data;
-    }
-
-    async function dbDeleteDriver(driverId){
-      const { error } = await supabase
-        .from("drivers")
-        .delete()
-        .eq("id", driverId);
-      if(error) throw error;
-    }
-
-    async function dbGetEntriesForMonth(monthDate){
-      const y = monthDate.getFullYear();
-      const m = monthDate.getMonth()+1;
-      const start = `${y}-${pad2(m)}-01`;
-      const end = `${y}-${pad2(m)}-${pad2(daysInMonth(monthDate))}`;
-
-      const { data, error } = await supabase
-        .from("schedule_entries")
-        .select("id,driver_id,work_date,kind,line,time_hhmm,covered_by_driver_id,notes,ponta")
-        .gte("work_date", start)
-        .lte("work_date", end);
-
-      if(error) throw error;
-      return data || [];
-    }
-
-    async function dbGetEntry(driverId, dateStr){
-      const { data, error } = await supabase
-        .from("schedule_entries")
-        .select("id,driver_id,work_date,kind,line,time_hhmm,covered_by_driver_id,notes,ponta")
-        .eq("driver_id", driverId)
-        .eq("work_date", dateStr)
-        .maybeSingle();
-      if(error) throw error;
-      return data;
-    }
-
-    async function dbDeleteEntry(driverId, dateStr){
-      const { error } = await supabase
-        .from("schedule_entries")
-        .delete()
-        .eq("driver_id", driverId)
-        .eq("work_date", dateStr);
-      if(error) throw error;
-    }
-
-    async function dbUpsertEntry(payload){
-      const { error } = await supabase
-        .from("schedule_entries")
-        .upsert(payload, { onConflict: "driver_id,work_date" });
-      if(error) throw error;
-    }
-
-    /* Auth */
-    function renderAuth(isAuthed){
-      if(isAuthed){
-        hide(loginView);
-        show(appView);
-      }else{
-        show(loginView);
-        hide(appView);
-      }
-    }
-
-    async function refreshSessionAndRender(){
-      const { data } = await supabase.auth.getSession();
-      renderAuth(!!data.session);
-      return data.session;
-    }
-
-    btnLogin.addEventListener("click", async () => {
-      const email = (loginEmail.value || "").trim();
-      const password = (loginPass.value || "").trim();
-      loginErr.style.display = "none";
-
-      try{
-        setBusy(true);
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if(error){
-          loginErr.style.display = "block";
-          return;
-        }
-        await refreshSessionAndRender();
-        await loadFromDBAndRender();
-      }finally{
-        setBusy(false);
-      }
-    });
-
-    loginPass.addEventListener("keydown", (e) => { if(e.key === "Enter") btnLogin.click(); });
-    loginEmail.addEventListener("keydown", (e) => { if(e.key === "Enter") btnLogin.click(); });
-
-    btnLogout.addEventListener("click", async () => {
-      try{
-        setBusy(true);
-        await supabase.auth.signOut();
-        closeDrawer();
-        renderAuth(false);
-      }finally{
-        setBusy(false);
-      }
-    });
-
-    /* Filters & month */
-    searchMat.addEventListener("input", () => {
-      state.searchText = (searchMat.value || "").trim().toLowerCase();
-      renderTable();
-    });
-
-    roleFilter.addEventListener("change", () => {
-      state.roleFilter = roleFilter.value;
-      renderTable();
-    });
-
-    lineFilter.addEventListener("input", () => {
-      state.lineFilterText = (lineFilter.value || "").trim().toLowerCase();
-      renderTable();
-    });
-
-    monthPicker.addEventListener("change", async () => {
-      if(!monthPicker.value) return;
-      state.selectedMonth = parseMonthKey(monthPicker.value);
-      try{
-        setBusy(true);
-        await loadMonthEntriesIntoState();
-        renderAll();
-      }catch(err){
-        alert("Erro ao carregar mês: " + (err?.message || err));
-      }finally{
-        setBusy(false);
-      }
-    });
-
-    /* Driver modal */
-    function openDriverModalCreate(){
-      driverFormMode = { mode:"create", driverId:null };
-      driverModalTitle.textContent = "Cadastrar fiscal";
-      inMat.value = "";
-      inName.value = "";
-      inPhone.value = "";
-      inRole.value = "fixo";
-      inLine.value = "";
-      inPontaBase.value = "";
-      addOverlay.classList.add("show");
-      setTimeout(()=> inMat.focus(), 60);
-    }
-
-    function openDriverModalEdit(driverId){
-      const drv = state.drivers.find(d => d.id === driverId);
-      if(!drv) return;
-
-      driverFormMode = { mode:"edit", driverId };
-      driverModalTitle.textContent = "Editar fiscal";
-      inMat.value = drv.mat || "";
-      inName.value = drv.name || "";
-      inPhone.value = drv.phone || "";
-      inRole.value = (drv.role || "fixo");
-      inLine.value = drv.line_default || "";
-
-      const base = normalizePonta(drv.ponta_base || "");
-      inPontaBase.value = (base === "TP" || base === "TS") ? base : (base === "Circular" ? "CIRCULAR" : "");
-
-      addOverlay.classList.add("show");
-      setTimeout(()=> inName.focus(), 60);
-    }
-
-    function closeAdd(){ addOverlay.classList.remove("show"); }
-    btnAddDriver.addEventListener("click", openDriverModalCreate);
-    btnCloseAdd.addEventListener("click", closeAdd);
-    addOverlay.addEventListener("click", (e)=>{ if(e.target === addOverlay) closeAdd(); });
-
-    btnSaveDriver.addEventListener("click", async () => {
-      const mat = (inMat.value || "").trim();
-      const name = (inName.value || "").trim();
-      const phone = (inPhone.value || "").trim();
-      const role = (inRole.value || "fixo").trim();
-      const line_default = (inLine.value || "").trim() || null;
-
-      const ponta_raw = String(inPontaBase.value || "").trim();
-      let ponta_base = null;
-      if(ponta_raw === "TP" || ponta_raw === "TS") ponta_base = ponta_raw;
-      else if(ponta_raw === "CIRCULAR") ponta_base = "Circular";
-      else ponta_base = null;
-
-      if(!mat || !name){
-        alert("Preencha pelo menos Matrícula e Nome.");
-        return;
-      }
-
-      try{
-        setBusy(true);
-
-        if(driverFormMode.mode === "create"){
-          const exists = state.drivers.some(d => String(d.mat).trim() === mat);
-          if(exists){
-            alert("Já existe um fiscal com essa matrícula.");
-            return;
-          }
-
-          const inserted = await dbInsertDriver({
-            mat, name, phone,
-            role,
-            line_default,
-            ponta_base
-          });
-
-          state.drivers.push(inserted);
-          state.drivers.sort((a,b)=> (a.mat||"").localeCompare(b.mat||"", "pt-BR", {numeric:true}));
-          closeAdd();
-          await loadMonthEntriesIntoState();
-          renderAll();
-          return;
-        }
-
-        const id = driverFormMode.driverId;
-        const updated = await dbUpdateDriver(id, { mat, name, phone, role, line_default, ponta_base });
-
-        state.drivers = state.drivers.map(d => d.id === id ? updated : d);
-        state.drivers.sort((a,b)=> (a.mat||"").localeCompare(b.mat||"", "pt-BR", {numeric:true}));
-
-        if(state.selectedDriverId === id && drawer.classList.contains("open")){
-          dName.textContent = `${updated.mat} • ${updated.name}`;
-          const meta = [
-            updated.phone ? `📞 ${updated.phone}` : null,
-            updated.role ? `👤 ${updated.role}` : null,
-            updated.line_default ? `🚌 ${updated.line_default}` : null,
-            updated.ponta_base ? `📍 ${updated.ponta_base}` : null,
-            `🏷️ ${statusForDriverToday(updated.id)}`
-          ].filter(Boolean);
-          dSub.innerHTML = meta.map(m => `<span class="kbd">${escapeHtml(m)}</span>`).join(" ");
-        }
-
-        closeAdd();
-        renderTable();
-      }catch(err){
-        alert("Erro ao salvar fiscal: " + (err?.message || err));
-      }finally{
-        setBusy(false);
-      }
-    });
-
-    /* Day modal */
-    function fillCode7Options(){
-      const opts = [];
-      opts.push(`<option value="">(selecionar)</option>`);
-      for(let n=CODE7_MIN; n<=CODE7_MAX; n++){
-        opts.push(`<option value="${n}">${n}</option>`);
-      }
-      eCode7.innerHTML = opts.join("");
-    }
-
-    function openEdit(driverId, dateStr){
-      editCtx = { driverId, dateStr };
-      const drv = state.drivers.find(d => d.id === driverId);
-
-      eDriver.textContent = drv ? `${drv.mat} • ${drv.name}` : "";
-      eDate.textContent = fmtNiceDate(dateStr);
-
-      applySingle.checked = true;
-      applyRange.checked = false;
-      hide(rangeBox);
-
-      eStart.value = dateStr;
-      eEnd.value = dateStr;
-
-      const entry = state.entriesByDriver?.[driverId]?.[dateStr] || null;
-
-      const kind = entry?.kind || "trabalho";
-      eKind.value = kind;
-      eLine.value = entry?.line || (drv?.line_default || "");
-      eTime.value = entry?.time_hhmm || "";
-
-      // notas sem marcadores
-      let cleanNotes = removeCode7Marker(entry?.notes || "");
-      cleanNotes = removePeriodMarker(cleanNotes);
-      eNotes.value = cleanNotes;
-
-      const defaultPonta = normalizePonta(entry?.ponta || "") || normalizePonta(drv?.ponta_base || "");
-      ePonta.value = (defaultPonta === "TP" || defaultPonta === "TS") ? defaultPonta : (defaultPonta === "Circular" ? "CIRCULAR" : "");
-
-      const code7 = entry?.code7 || extractCode7FromNotes(entry?.notes || "");
-      eCode7.value = code7 || "";
-
-      // período (prioridade: marcador > hora > tipo)
-      const p = entry ? effectivePeriod(entry) : (kind === "folga" || kind === "ferias" ? "I" : (timeToPeriod(eTime.value) || "M"));
-      ePeriod.value = p || "M";
-
-      syncCoverBoxVisibility();
-      fillCoverSelectOptions();
-
-      const coveredBy = entry?.covered_by_driver_id || "";
-      eCoverSelect.value = coveredBy || "";
-
-      editOverlay.classList.add("show");
-      setTimeout(() => eLine.focus(), 60);
-    }
-
-    function closeEdit(){
-      editOverlay.classList.remove("show");
-      editCtx = { driverId:null, dateStr:null };
-    }
-
-    btnCloseEdit.addEventListener("click", closeEdit);
-
-    function syncCoverBoxVisibility(){
-      const show = (eKind.value === "folga");
-      coverBox.style.display = show ? "block" : "none";
-      if(show){
-        ePeriod.value = "I"; // folga é integral
-      }
-      if(eKind.value === "ferias"){
-        ePeriod.value = "I";
-      }
-    }
-
-    function syncRangeBoxVisibility(){
-      const showRange = applyRange.checked;
-      if(showRange) show(rangeBox);
-      else hide(rangeBox);
-    }
-
-    applySingle.addEventListener("change", syncRangeBoxVisibility);
-    applyRange.addEventListener("change", syncRangeBoxVisibility);
-
-    eKind.addEventListener("change", () => {
-      syncCoverBoxVisibility();
-      const drv = state.drivers.find(d => d.id === editCtx.driverId);
-
-      if(eKind.value === "trabalho" && drv?.line_default && !eLine.value.trim()){
-        eLine.value = drv.line_default;
-      }
-      if(eKind.value !== "folga"){
-        eCoverSelect.value = "";
-      }
-      if(eKind.value === "folga" && drv?.ponta_base){
-        const pb = normalizePonta(drv.ponta_base);
-        ePonta.value = (pb === "TP" || pb === "TS") ? pb : (pb === "Circular" ? "CIRCULAR" : "");
-      }
-      if(eKind.value === "ferias"){
-        ePeriod.value = "I";
-      }
-    });
-
-    // se mudar hora e não for integral, sugere período automaticamente (sem forçar)
-    eTime.addEventListener("input", () => {
-      if(ePeriod.value === "I") return;
-      const p = timeToPeriod(eTime.value);
-      if(p) ePeriod.value = p;
-    });
-
-    function fillCoverSelectOptions(){
-      const plantonistas = state.drivers
-        .filter(d => (d.role || "").toLowerCase() === "plantonista")
-        .sort((a,b)=> (a.mat||"").localeCompare(b.mat||"", "pt-BR", {numeric:true}));
-
-      const options = [];
-      options.push(`<option value="">(sem cobridor)</option>`);
-      for(const p of plantonistas){
-        options.push(`<option value="${p.id}">${escapeHtml(p.mat)} • ${escapeHtml(firstName(p.name))}</option>`);
-      }
-      eCoverSelect.innerHTML = options.join("");
-    }
-
-    btnClearCover.addEventListener("click", () => { eCoverSelect.value = ""; });
-
-    function buildRangeDates(startStr, endStr){
-      const s = toDate(startStr);
-      const e = toDate(endStr);
-      if(e < s) return [];
-      const out = [];
-      let cur = new Date(s);
-      while(cur <= e){
-        out.push(dateToYmd(cur));
-        cur = addDays(cur, 1);
-      }
-      return out;
-    }
-
-    async function saveOneDay({driverId, dateStr, kind, line, time_hhmm, ponta, notesClean, code7Selected, periodSelected, covered_by_driver_id}){
-      const drv = state.drivers.find(d => d.id === driverId);
-      const isWorkDay = WORK_KINDS.has(String(kind||"").toLowerCase().trim());
-
-      // limpa marcadores e reaplica no final
-      let finalNotes = removeCode7Marker(removePeriodMarker(notesClean || ""));
-
-      // aplica período (sempre salva marcador pra ficar consistente)
-      let p = String(periodSelected || "").toUpperCase();
-      if(kind === "folga" || kind === "ferias") p = "I";
-      if(p !== "M" && p !== "T" && p !== "I") p = "M";
-      finalNotes = addPeriodMarker(finalNotes, p);
-
-      if(isWorkDay){
-        const streakBefore = await computeStreakBefore(driverId, dateStr);
-        if(streakBefore === 6){
-          if(!isValidCode7(code7Selected)){
-            throw new Error(`No 7º dia consecutivo (${fmtNiceDate(dateStr)}) é obrigatório escolher um código (50001–50040).`);
-          }
-          finalNotes = addCode7Marker(finalNotes, String(code7Selected));
-        }else{
-          finalNotes = removeCode7Marker(finalNotes);
-        }
-      }else{
-        finalNotes = removeCode7Marker(finalNotes);
-      }
-
-      await dbUpsertEntry({
-        driver_id: driverId,
-        work_date: dateStr,
-        kind,
-        line,
-        time_hhmm,
-        covered_by_driver_id: covered_by_driver_id || null,
-        notes: finalNotes || null,
-        ponta
-      });
-
-      if(kind === "folga" && covered_by_driver_id){
-        const coverNotes = drv ? shortPerson(drv) : null;
-
-        let inheritedPonta = null;
-        const pb = normalizePonta(drv?.ponta_base || "");
-        if(pb === "TP" || pb === "TS") inheritedPonta = pb;
-        else if(pb === "Circular") inheritedPonta = "Circular";
-        else inheritedPonta = ponta || null;
-
-        // cobertura segue o mesmo período do folguista (integral)
-        const covNotes = addPeriodMarker(removePeriodMarker(coverNotes || ""), "I");
-
-        await dbUpsertEntry({
-          driver_id: covered_by_driver_id,
-          work_date: dateStr,
-          kind: "cobertura",
-          line,
-          time_hhmm,
-          covered_by_driver_id: null,
-          notes: covNotes,
-          ponta: inheritedPonta
-        });
-      }
-    }
-
-    /* ✅ LIMPAR: limpa também intervalo */
-    btnClearDay.addEventListener("click", async () => {
-      if(!editCtx.driverId || !editCtx.dateStr) return;
-
-      try{
-        setBusy(true);
-
-        const driverId = editCtx.driverId;
-        const isRange = applyRange.checked;
-
-        let datesToClear = [editCtx.dateStr];
-        if(isRange){
-          const s = (eStart.value || "").trim();
-          const e = (eEnd.value || "").trim();
-          if(!s || !e){
-            alert("Preencha Data inicial e Data final para limpar o intervalo.");
-            return;
-          }
-          datesToClear = buildRangeDates(s, e).filter(withinSelectedMonth);
-          if(datesToClear.length === 0){
-            alert("Intervalo inválido (ou fora do mês selecionado).");
-            return;
-          }
-        }
-
-        const affected = [];
-
-        for(const dateStr of datesToClear){
-          const existing = await dbGetEntry(driverId, dateStr);
-
-          if(existing?.kind === "folga" && existing?.covered_by_driver_id){
-            await dbDeleteEntry(existing.covered_by_driver_id, dateStr);
-          }
-
-          await dbDeleteEntry(driverId, dateStr);
-          affected.push(dateStr);
-        }
-
-        closeEdit();
-        await loadMonthEntriesIntoState();
-        renderAll();
-
-        const conflicts = findFixedDoubleFolgaConflicts(affected);
-        notifyConflicts(conflicts);
-
-      }catch(err){
-        alert("Erro ao limpar: " + (err?.message || err));
-      }finally{
-        setBusy(false);
-      }
-    });
-
-    btnSaveDay.addEventListener("click", async () => {
-      if(!editCtx.driverId || !editCtx.dateStr) return;
-
-      try{
-        setBusy(true);
-
-        const driverId = editCtx.driverId;
-        const clickedDate = editCtx.dateStr;
-        const drv = state.drivers.find(d => d.id === driverId);
-
-        const kind = eKind.value;
-        const line = (eLine.value || "").trim() || null;
-        const time_hhmm = (eTime.value || "").trim() || null;
-
-        let ponta = null;
-        const pr = String(ePonta.value || "").trim();
-        if(pr === "TP" || pr === "TS") ponta = pr;
-        else if(pr === "CIRCULAR") ponta = "Circular";
-        else ponta = null;
-
-        if(!ponta && (drv?.role || "").toLowerCase() === "fixo"){
-          const pb = normalizePonta(drv?.ponta_base || "");
-          if(pb === "TP" || pb === "TS") ponta = pb;
-          else if(pb === "Circular") ponta = "Circular";
-        }
-
-        const notesClean = (eNotes.value || "").trim() || "";
-        const code7Selected = (eCode7.value || "").trim();
-        const periodSelected = (ePeriod.value || "M").trim().toUpperCase();
-
-        let covered_by_driver_id = null;
-        if(kind === "folga"){
-          covered_by_driver_id = eCoverSelect.value || null;
-        }
-
-        const isRange = applyRange.checked;
-        let datesToApply = [clickedDate];
-
-        if(isRange){
-          const s = (eStart.value || "").trim();
-          const e = (eEnd.value || "").trim();
-          if(!s || !e){
-            alert("Preencha Data inicial e Data final.");
-            return;
-          }
-          datesToApply = buildRangeDates(s, e).filter(withinSelectedMonth);
-          if(datesToApply.length === 0){
-            alert("Intervalo inválido (ou fora do mês selecionado).");
-            return;
-          }
-
-          if(WORK_KINDS.has(String(kind||"").toLowerCase().trim())){
-            if(!isValidCode7(code7Selected)){
-              alert("Para aplicar em vários dias, selecione o Código do 7º dia (50001–50040).");
-              return;
-            }
-          }
-        }
-
-        const affectedDates = [];
-
-        for(const dateStr of datesToApply){
-          const existing = await dbGetEntry(driverId, dateStr);
-          const prevCov = existing?.covered_by_driver_id || null;
-
-          await saveOneDay({
-            driverId,
-            dateStr,
-            kind,
-            line,
-            time_hhmm,
-            ponta,
-            notesClean,
-            code7Selected,
-            periodSelected,
-            covered_by_driver_id
-          });
-
-          if(prevCov && prevCov !== covered_by_driver_id){
-            await dbDeleteEntry(prevCov, dateStr);
-          }
-
-          affectedDates.push(dateStr);
-        }
-
-        closeEdit();
-        await loadMonthEntriesIntoState();
-        renderAll();
-
-        const conflicts = findFixedDoubleFolgaConflicts(affectedDates);
-        notifyConflicts(conflicts);
-
-      }catch(err){
-        alert(err?.message ? err.message : ("Erro ao salvar: " + err));
-      }finally{
-        setBusy(false);
-      }
-    });
-
-    /* Drawer */
-    function openDrawer(driverId){
-      state.selectedDriverId = driverId;
-      const drv = state.drivers.find(d => d.id === driverId);
-      if(!drv) return;
-
-      dName.textContent = `${drv.mat} • ${drv.name}`;
-      const meta = [
-        drv.phone ? `📞 ${drv.phone}` : null,
-        drv.role ? `👤 ${drv.role}` : null,
-        drv.line_default ? `🚌 ${drv.line_default}` : null,
-        drv.ponta_base ? `📍 ${drv.ponta_base}` : null,
-        `🏷️ ${statusForDriverToday(drv.id)}`
-      ].filter(Boolean);
-
-      dSub.innerHTML = meta.map(m => `<span class="kbd">${escapeHtml(m)}</span>`).join(" ");
-
-      drawer.classList.add("open");
-      drawer.setAttribute("aria-hidden","false");
-
-      drawer.classList.add("fullscreen");
-      btnFull.textContent = "🧩 Voltar";
-      drawer.scrollTop = 0;
-
-      renderCalendar();
-    }
-
-    function closeDrawer(){
-      state.selectedDriverId = null;
-      drawer.classList.remove("open");
-      drawer.classList.remove("fullscreen");
-      drawer.setAttribute("aria-hidden","true");
-    }
-
-    btnCloseDrawer.addEventListener("click", closeDrawer);
-
-    btnFull.addEventListener("click", () => {
-      if(!drawer.classList.contains("open")) return;
-      drawer.classList.toggle("fullscreen");
-      btnFull.textContent = drawer.classList.contains("fullscreen") ? "🧩 Voltar" : "🖥️ Tela cheia";
-    });
-
-    btnEditDriver.addEventListener("click", () => {
-      if(!state.selectedDriverId) return;
-      openDriverModalEdit(state.selectedDriverId);
-    });
-
-    btnRemoveDriver.addEventListener("click", async () => {
-      const id = state.selectedDriverId;
-      if(!id) return;
-      const drv = state.drivers.find(d => d.id === id);
-      if(!drv) return;
-
-      const ok = confirm(`Remover o fiscal ${drv.mat} • ${drv.name}?\n(As escalas dele também serão removidas.)`);
-      if(!ok) return;
-
-      try{
-        setBusy(true);
-        await dbDeleteDriver(id);
-        state.drivers = state.drivers.filter(d => d.id !== id);
-        delete state.entriesByDriver[id];
-        closeDrawer();
-        renderAll();
-      }catch(err){
-        alert("Erro ao remover: " + (err?.message || err));
-      }finally{
-        setBusy(false);
-      }
-    });
-
-    btnWhats.addEventListener("click", async () => {
-      const id = state.selectedDriverId;
-      if(!id) return;
-      const drv = state.drivers.find(d => d.id === id);
-      if(!drv) return;
-
-      const phoneDigits = normalizePhoneBR(drv.phone);
-      btnWhats.disabled = true;
-      btnWhats.textContent = "⏳ Gerando PNG...";
-
-      try{
-        const blob = await captureCalendarImage();
-        const y = state.selectedMonth.getFullYear();
-        const m = pad2(state.selectedMonth.getMonth()+1);
-        const filename = `calendario-${drv.mat}-${y}-${m}.png`;
-
-        downloadBlob(blob, filename);
-        const copied = await tryCopyImageToClipboard(blob);
-
-        if(phoneDigits && phoneDigits.length >= 10){
-          const text = buildWhatsappText(drv, state.selectedMonth);
-          openWhatsApp(phoneDigits, text);
-        }
-
-        setTimeout(() => {
-          alert(copied ? "PNG gerado e copiado ✅" : "PNG gerado ✅");
-        }, 250);
-
-      }catch(e){
-        alert("Erro ao gerar PNG: " + (e?.message || e));
-      }finally{
-        btnWhats.disabled = false;
-        btnWhats.textContent = "📲 Baixar calendário (PNG)";
-      }
-    });
-
-    /* Rendering */
     function ensureMonthInit(){
       if(!state.selectedMonth){
         const now = new Date();
@@ -2165,33 +1488,46 @@
       monthPicker.value = monthKey(state.selectedMonth.getFullYear(), state.selectedMonth.getMonth()+1);
     }
 
-    function renderAll(){
-      ensureMonthInit();
-      renderTable();
-      if(drawer.classList.contains("open")){
-        renderCalendar();
-        if(state.selectedDriverId){
-          const drv = state.drivers.find(d => d.id === state.selectedDriverId);
-          if(drv){
-            const meta = [
-              drv.phone ? `📞 ${drv.phone}` : null,
-              drv.role ? `👤 ${drv.role}` : null,
-              drv.line_default ? `🚌 ${drv.line_default}` : null,
-              drv.ponta_base ? `📍 ${drv.ponta_base}` : null,
-              `🏷️ ${statusForDriverToday(drv.id)}`
-            ].filter(Boolean);
-            dSub.innerHTML = meta.map(m => `<span class="kbd">${escapeHtml(m)}</span>`).join(" ");
-          }
-        }
+    function todaysYmd(){
+      const now = new Date();
+      return ymd(now.getFullYear(), now.getMonth()+1, now.getDate());
+    }
+
+    function statusForDriverToday(driverId){
+      const today = todaysYmd();
+      const entry = state.entriesByDriver?.[driverId]?.[today] || null;
+      if(!entry) return "Disponível";
+      const k = String(entry.kind||"").toLowerCase().trim();
+      if(k==="trabalho") return "Trabalhando";
+      if(k==="plantao") return "Plantão";
+      if(k==="ferias") return "Férias";
+      if(k==="folga") return "Folga";
+      if(k==="cobertura") return "Trabalhando";
+      return "Disponível";
+    }
+
+    function fillCode7Options(){
+      const opts = [`<option value="">(selecionar)</option>`];
+      for(let n=CODE7_MIN; n<=CODE7_MAX; n++) opts.push(`<option value="${n}">${n}</option>`);
+      eCode7.innerHTML = opts.join("");
+    }
+
+    function fillCoverSelectOptions(){
+      const plantonistas = state.drivers
+        .filter(d => String(d.role||"").toLowerCase()==="plantonista")
+        .sort((a,b)=> String(a.mat||"").localeCompare(String(b.mat||""), "pt-BR", {numeric:true}));
+
+      const options = [`<option value="">(sem cobridor)</option>`];
+      for(const p of plantonistas){
+        options.push(`<option value="${p.id}">${escapeHtml(p.mat)} • ${escapeHtml(firstName(p.name))}</option>`);
       }
+      eCoverSelect.innerHTML = options.join("");
     }
 
     function driverMatchesLineFilter(drv, filterLower){
       if(!filterLower) return true;
-
       const baseLine = String(drv.line_default || "").toLowerCase();
       if(baseLine && baseLine.includes(filterLower)) return true;
-
       const entries = state.entriesByDriver?.[drv.id] || {};
       for(const dateStr in entries){
         const e = entries[dateStr];
@@ -2202,10 +1538,12 @@
     }
 
     function renderTable(){
+      ensureMonthInit();
       const monthDate = state.selectedMonth;
       const y = monthDate.getFullYear();
       const m = monthDate.getMonth()+1;
       const nDays = daysInMonth(monthDate);
+      const dowShort = ["DOM","SEG","TER","QUA","QUI","SEX","SAB"];
 
       const th = [];
       th.push(`<tr>`);
@@ -2213,7 +1551,7 @@
       for(let d=1; d<=nDays; d++){
         const dt = new Date(y, m-1, d);
         const dow = dowShort[dt.getDay()];
-        th.push(`<th title="${dow}">${pad2(d)}<div style="color:rgba(11,26,16,.55);font-weight:900;font-size:11px;margin-top:2px;">${dow}</div></th>`);
+        th.push(`<th title="${dow}">${pad2(d)}<div style="color:rgba(42,11,18,.55);font-weight:950;font-size:11px;margin-top:2px;">${dow}</div></th>`);
       }
       th.push(`</tr>`);
       monthThead.innerHTML = th.join("");
@@ -2222,15 +1560,15 @@
 
       const filtered = state.drivers
         .slice()
-        .sort((a,b)=> (a.mat||"").localeCompare(b.mat||"", "pt-BR", {numeric:true}))
+        .sort((a,b)=> String(a.mat||"").localeCompare(String(b.mat||""), "pt-BR", {numeric:true}))
         .filter(d => {
           if(state.roleFilter !== "todos"){
-            const r = (d.role || "").toLowerCase().trim();
+            const r = String(d.role || "").toLowerCase().trim();
             if(r !== state.roleFilter) return false;
           }
           if(state.searchText){
-            const mat = (d.mat || "").toLowerCase();
-            const name = (d.name || "").toLowerCase();
+            const mat = String(d.mat || "").toLowerCase();
+            const name = String(d.name || "").toLowerCase();
             if(!mat.includes(state.searchText) && !name.includes(state.searchText)) return false;
           }
           if(!driverMatchesLineFilter(d, filterLineLower)) return false;
@@ -2239,7 +1577,7 @@
 
       const rows = [];
       if(filtered.length === 0){
-        rows.push(`<tr><td class="col-driver"><span class="muted">Nenhum fiscal encontrado.</span></td>${"<td></td>".repeat(nDays)}</tr>`);
+        rows.push(`<tr><td class="col-driver"><span class="muted">Nenhum cadastrado.</span></td>${"<td></td>".repeat(nDays)}</tr>`);
         monthTbody.innerHTML = rows.join("");
         return;
       }
@@ -2267,7 +1605,6 @@
           const dateStr = ymd(y,m,d);
           const entry = state.entriesByDriver?.[drv.id]?.[dateStr] || null;
 
-          // separa M/T
           const period = entry ? effectivePeriod(entry) : "";
           const cls = chipClass(entry);
 
@@ -2275,7 +1612,6 @@
           const html = entry ? linesToHtml(lines) : "—";
 
           const emptyChip = `<span class="chip empty" data-edit="${drv.id}" data-date="${dateStr}" title="Editar"><span class="chipText">—</span></span>`;
-
           const chipFilled = `
             <span class="${cls}" data-edit="${drv.id}" data-date="${dateStr}" title="Editar">
               <span class="chipText">${html}</span>
@@ -2286,14 +1622,9 @@
           let tSlot = emptyChip;
 
           if(entry){
-            if(period === "I"){
-              mSlot = chipFilled;
-              tSlot = chipFilled;
-            }else if(period === "T"){
-              tSlot = chipFilled;
-            }else{
-              mSlot = chipFilled;
-            }
+            if(period === "I"){ mSlot = chipFilled; tSlot = chipFilled; }
+            else if(period === "T"){ tSlot = chipFilled; }
+            else { mSlot = chipFilled; }
           }
 
           rows.push(`
@@ -2353,8 +1684,7 @@
         const lines = entry ? entryToLines(entry) : ["Disponível"];
         const labelHtml = entry ? linesToHtml(lines) : "Disponível";
 
-        const valCls = calendarValClass(entry);
-
+        const valCls = calValClass(entry);
         const emptyVal = `<div class="val empty">—</div>`;
         const filledVal = `<div class="${valCls}">${labelHtml}</div>`;
 
@@ -2362,14 +1692,9 @@
         let tVal = emptyVal;
 
         if(entry){
-          if(period === "I"){
-            mVal = filledVal;
-            tVal = filledVal;
-          }else if(period === "T"){
-            tVal = filledVal;
-          }else{
-            mVal = filledVal;
-          }
+          if(period === "I"){ mVal = filledVal; tVal = filledVal; }
+          else if(period === "T"){ tVal = filledVal; }
+          else { mVal = filledVal; }
         }else{
           mVal = `<div class="val empty">Disponível</div>`;
           tVal = `<div class="val empty">Disponível</div>`;
@@ -2399,68 +1724,586 @@
       }
 
       calGrid.innerHTML = cells.join("");
-
       calGrid.querySelectorAll("[data-editcal]").forEach(el => {
         el.addEventListener("click", () => openEdit(id, el.getAttribute("data-editcal")));
       });
     }
 
-    /* Load data */
-    async function loadMonthEntriesIntoState(){
-      ensureMonthInit();
-      const entries = await dbGetEntriesForMonth(state.selectedMonth);
+    function openDrawer(driverId){
+      state.selectedDriverId = driverId;
+      const drv = state.drivers.find(d => d.id === driverId);
+      if(!drv) return;
 
-      const map = {};
-      for(const d of state.drivers) map[d.id] = {};
+      dName.textContent = `${drv.mat} • ${drv.name}`;
+      const meta = [
+        drv.phone ? `📞 ${drv.phone}` : null,
+        drv.role ? `👤 ${drv.role}` : null,
+        drv.line_default ? `🚌 ${drv.line_default}` : null,
+        drv.ponta_base ? `📍 ${drv.ponta_base}` : null,
+        `🏷️ ${statusForDriverToday(drv.id)}`
+      ].filter(Boolean);
 
-      for(const it of entries){
-        if(!map[it.driver_id]) map[it.driver_id] = {};
-        map[it.driver_id][it.work_date] = {
-          kind: it.kind || "trabalho",
-          line: it.line || "",
-          time_hhmm: it.time_hhmm || "",
-          ponta: it.ponta || "",
-          covered_by_driver_id: it.covered_by_driver_id || null,
-          notes: it.notes || "",
-          code7: extractCode7FromNotes(it.notes || "")
-        };
-      }
+      dSub.innerHTML = meta.map(m => `<span class="kbd">${escapeHtml(m)}</span>`).join(" ");
 
-      state.entriesByDriver = map;
+      drawer.classList.add("open");
+      drawer.setAttribute("aria-hidden","false");
+      drawer.classList.add("fullscreen");
+      btnFull.textContent = "🧩 Voltar";
+      drawer.scrollTop = 0;
+
+      renderCalendar();
     }
 
-    async function loadFromDBAndRender(){
-      const session = await refreshSessionAndRender();
-      if(!session) return;
+    function closeDrawer(){
+      state.selectedDriverId = null;
+      drawer.classList.remove("open");
+      drawer.classList.remove("fullscreen");
+      drawer.setAttribute("aria-hidden","true");
+    }
 
-      setBusy(true);
+    btnCloseDrawer.addEventListener("click", closeDrawer);
+    btnFull.addEventListener("click", () => {
+      if(!drawer.classList.contains("open")) return;
+      drawer.classList.toggle("fullscreen");
+      btnFull.textContent = drawer.classList.contains("fullscreen") ? "🧩 Voltar" : "🖥️ Tela cheia";
+    });
+
+    /* PNG */
+    async function captureCalendarImage(){
+      const el = document.getElementById("calCapture");
+      if(!el) throw new Error("Calendário não encontrado.");
+      drawer.classList.add("fullscreen");
+      btnFull.textContent = "🧩 Voltar";
+      drawer.scrollTop = 0;
+
+      await new Promise(r=>setTimeout(r,120));
+      const canvas = await html2canvas(el, { backgroundColor:"#ffffff", scale: 2.2, useCORS: true });
+      return new Promise((resolve)=> canvas.toBlob((blob)=>resolve(blob), "image/png", 1.0));
+    }
+    function downloadBlob(blob, filename){
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url), 6000);
+    }
+
+    btnPng.addEventListener("click", async ()=>{
+      if(!state.selectedDriverId) return;
+      const drv = state.drivers.find(d=>d.id===state.selectedDriverId);
+      if(!drv) return;
+
       try{
-        state.drivers = await dbGetDrivers();
-        await loadMonthEntriesIntoState();
-        renderAll();
-      }catch(err){
-        alert("Erro ao carregar dados do Supabase: " + (err?.message || err));
+        setBusy(true);
+        const blob = await captureCalendarImage();
+        const y = state.selectedMonth.getFullYear();
+        const m = pad2(state.selectedMonth.getMonth()+1);
+        downloadBlob(blob, `calendario-${drv.mat}-${y}-${m}.png`);
+        toast("PNG gerado ✅");
+      }catch(e){
+        alert("Erro ao gerar PNG: " + (e?.message || e));
       }finally{
         setBusy(false);
       }
+    });
+
+    /* Driver modal */
+    function openDriverModalCreate(){
+      driverFormMode = { mode:"create", driverId:null };
+      driverModalTitle.textContent = "Cadastrar";
+      inMat.value = ""; inName.value = ""; inPhone.value = "";
+      inRole.value = "fixo"; inLine.value = ""; inPontaBase.value = "";
+      addOverlay.classList.add("show");
+      setTimeout(()=> inMat.focus(), 60);
+    }
+    function openDriverModalEdit(id){
+      const drv = state.drivers.find(d=>d.id===id);
+      if(!drv) return;
+      driverFormMode = { mode:"edit", driverId:id };
+      driverModalTitle.textContent = "Editar";
+      inMat.value = drv.mat || "";
+      inName.value = drv.name || "";
+      inPhone.value = drv.phone || "";
+      inRole.value = drv.role || "fixo";
+      inLine.value = drv.line_default || "";
+      const base = normalizePonta(drv.ponta_base || "");
+      inPontaBase.value = (base==="TP"||base==="TS") ? base : (base==="Circular" ? "CIRCULAR" : "");
+      addOverlay.classList.add("show");
+      setTimeout(()=> inName.focus(), 60);
+    }
+    function closeAdd(){ addOverlay.classList.remove("show"); }
+    btnAddDriver.addEventListener("click", openDriverModalCreate);
+    btnCloseAdd.addEventListener("click", closeAdd);
+    addOverlay.addEventListener("click", (e)=>{ if(e.target===addOverlay) closeAdd(); });
+
+    btnSaveDriver.addEventListener("click", async ()=>{
+      const mat = (inMat.value||"").trim();
+      const name = (inName.value||"").trim();
+      const phone = (inPhone.value||"").trim();
+      const role = (inRole.value||"fixo").trim();
+      const line_default = (inLine.value||"").trim() || null;
+
+      const ponta_raw = String(inPontaBase.value||"").trim();
+      let ponta_base = null;
+      if(ponta_raw==="TP"||ponta_raw==="TS") ponta_base = ponta_raw;
+      else if(ponta_raw==="CIRCULAR") ponta_base = "Circular";
+
+      if(!mat || !name){ alert("Preencha Matrícula e Nome."); return; }
+
+      try{
+        setBusy(true);
+
+        if(driverFormMode.mode==="create"){
+          if(state.drivers.some(d=>String(d.mat).trim()===mat)){
+            alert("Já existe alguém com essa matrícula."); return;
+          }
+          const inserted = await dbInsertDriver({ mat, name, phone, role, line_default, ponta_base });
+          state.drivers.push(inserted);
+        }else{
+          const id = driverFormMode.driverId;
+          const updated = await dbUpdateDriver(id, { mat, name, phone, role, line_default, ponta_base });
+          state.drivers = state.drivers.map(d=>d.id===id?updated:d);
+        }
+
+        state.drivers.sort((a,b)=>String(a.mat||"").localeCompare(String(b.mat||""), "pt-BR", {numeric:true}));
+        closeAdd();
+        await loadMonthEntriesIntoState();
+        renderAll();
+      }catch(err){
+        alert("Erro ao salvar: " + (err?.message || err));
+      }finally{
+        setBusy(false);
+      }
+    });
+
+    btnEditDriver.addEventListener("click", ()=>{
+      if(!state.selectedDriverId) return;
+      openDriverModalEdit(state.selectedDriverId);
+    });
+
+    btnRemoveDriver.addEventListener("click", async ()=>{
+      if(!state.selectedDriverId) return;
+      const drv = state.drivers.find(d=>d.id===state.selectedDriverId);
+      if(!drv) return;
+      if(!confirm(`Remover ${drv.mat} • ${drv.name}?`)) return;
+
+      try{
+        setBusy(true);
+        await dbDeleteDriver(drv.id);
+        state.drivers = state.drivers.filter(d=>d.id!==drv.id);
+        delete state.entriesByDriver[drv.id];
+        closeDrawer();
+        renderAll();
+      }catch(e){
+        alert("Erro ao remover: " + (e?.message || e));
+      }finally{
+        setBusy(false);
+      }
+    });
+
+    /* Edit modal */
+    function closeEdit(){ editOverlay.classList.remove("show"); editCtx={driverId:null,dateStr:null}; }
+    btnCloseEdit.addEventListener("click", closeEdit);
+
+    function syncRangeBoxVisibility(){ applyRange.checked ? show(rangeBox) : hide(rangeBox); }
+    applySingle.addEventListener("change", syncRangeBoxVisibility);
+    applyRange.addEventListener("change", syncRangeBoxVisibility);
+
+    btnClearCover.addEventListener("click", ()=>{ eCoverSelect.value=""; });
+
+    function syncCoverBoxVisibility(){
+      const showCover = (eKind.value==="folga" || eKind.value==="ferias");
+      coverBox.style.display = showCover ? "block" : "none";
+      if(showCover) ePeriod.value = "I";
+      if(!showCover) eOpenCover.checked = false;
+    }
+    eKind.addEventListener("change", syncCoverBoxVisibility);
+    eTime.addEventListener("input", ()=>{
+      if(ePeriod.value==="I") return;
+      const p = timeToPeriod(eTime.value);
+      if(p) ePeriod.value = p;
+    });
+
+    function openEdit(driverId, dateStr){
+      editCtx = { driverId, dateStr };
+      const drv = state.drivers.find(d=>d.id===driverId);
+
+      eDriver.textContent = drv ? `${drv.mat} • ${drv.name}` : "";
+      eDate.textContent = fmtNiceDate(dateStr);
+
+      applySingle.checked = true;
+      applyRange.checked = false;
+      hide(rangeBox);
+
+      eStart.value = dateStr;
+      eEnd.value = dateStr;
+
+      const entry = state.entriesByDriver?.[driverId]?.[dateStr] || null;
+
+      eKind.value = entry?.kind || "trabalho";
+      eLine.value = entry?.line || (drv?.line_default || "");
+      eTime.value = entry?.time_hhmm || "";
+
+      let cleanNotes = String(entry?.notes || "");
+      cleanNotes = removeCode7Marker(cleanNotes);
+      cleanNotes = removePeriodMarker(cleanNotes);
+      cleanNotes = removeCovOpen(cleanNotes);
+      cleanNotes = removeAutoCov(cleanNotes);
+      cleanNotes = cleanNotes.replace(/\s*\[COVSRC:\d+\]\s*/gi, " ").replace(/\s{2,}/g," ").trim();
+      eNotes.value = cleanNotes;
+
+      const defaultPonta = normalizePonta(entry?.ponta || "") || normalizePonta(drv?.ponta_base || "");
+      ePonta.value = (defaultPonta==="TP"||defaultPonta==="TS") ? defaultPonta : (defaultPonta==="Circular" ? "CIRCULAR" : "");
+
+      const code7 = entry?.code7 || extractCode7FromNotes(entry?.notes || "");
+      eCode7.value = code7 || "";
+
+      const p = entry ? effectivePeriod(entry) : ((eKind.value==="folga"||eKind.value==="ferias") ? "I" : (timeToPeriod(eTime.value)||"M"));
+      ePeriod.value = p || "M";
+
+      fillCoverSelectOptions();
+      eCoverSelect.value = entry?.covered_by_driver_id || "";
+
+      eOpenCover.checked = !!extractCovOpenId(entry?.notes || "");
+
+      syncCoverBoxVisibility();
+      editOverlay.classList.add("show");
+      setTimeout(()=> eLine.focus(), 60);
+    }
+
+    async function saveOneDay(driverId, dateStr, kind, line, time_hhmm, ponta, notesClean, code7Selected, periodSelected, coveredBy, openCover){
+      const isWorkDay = WORK_KINDS.has(String(kind||"").toLowerCase().trim());
+
+      // limpa marcadores
+      let finalNotes = String(notesClean || "");
+      finalNotes = removeCode7Marker(finalNotes);
+      finalNotes = removePeriodMarker(finalNotes);
+      finalNotes = removeCovOpen(finalNotes);
+      finalNotes = removeAutoCov(finalNotes);
+      finalNotes = finalNotes.replace(/\s*\[COVSRC:\d+\]\s*/gi, " ").replace(/\s{2,}/g," ").trim();
+
+      // período
+      let p = String(periodSelected||"").toUpperCase();
+      if(kind==="folga" || kind==="ferias") p="I";
+      if(!["M","T","I"].includes(p)) p="M";
+      finalNotes = addPeriodMarker(finalNotes, p);
+
+      // regra 7º dia
+      if(isWorkDay){
+        const streakBefore = await computeStreakBefore(state, driverId, dateStr);
+        if(streakBefore === 6){
+          if(!isValidCode7(code7Selected)){
+            throw new Error(`No 7º dia consecutivo (${fmtNiceDate(dateStr)}) é obrigatório escolher um código (50001–50040).`);
+          }
+          finalNotes = addCode7Marker(finalNotes, String(code7Selected));
+        }else{
+          finalNotes = removeCode7Marker(finalNotes);
+        }
+      }else{
+        finalNotes = removeCode7Marker(finalNotes);
+      }
+
+      // marca COVOPEN no dia inicial (se tempo indeterminado)
+      if(openCover && (kind==="folga"||kind==="ferias") && coveredBy){
+        finalNotes = addCovOpen(finalNotes, coveredBy);
+      }
+
+      await dbUpsertEntry({
+        driver_id: driverId,
+        work_date: dateStr,
+        kind,
+        line: line || null,
+        time_hhmm: time_hhmm || null,
+        covered_by_driver_id: coveredBy || null,
+        notes: finalNotes || null,
+        ponta: ponta || null
+      });
+
+      // se folga/férias COM cobridor e NÃO indeterminado, cria cobertura apenas nesse dia
+      if((kind==="folga"||kind==="ferias") && coveredBy && !openCover){
+        let cn = addPeriodMarker("", "I");
+        await dbUpsertEntry({
+          driver_id: coveredBy,
+          work_date: dateStr,
+          kind: "cobertura",
+          line: line || null,
+          time_hhmm: time_hhmm || null,
+          covered_by_driver_id: null,
+          notes: cn || null,
+          ponta: ponta || null
+        });
+      }
+    }
+
+    btnClearDay.addEventListener("click", async ()=>{
+      if(!editCtx.driverId || !editCtx.dateStr) return;
+      try{
+        setBusy(true);
+
+        const driverId = editCtx.driverId;
+        const isRange = applyRange.checked;
+
+        let datesToClear = [editCtx.dateStr];
+        if(isRange){
+          const s = (eStart.value||"").trim();
+          const e = (eEnd.value||"").trim();
+          if(!s || !e){ alert("Preencha data inicial e final."); return; }
+          datesToClear = buildRangeDates(s,e).filter(d=>withinSelectedMonth(state,d));
+          if(!datesToClear.length){ alert("Intervalo inválido / fora do mês."); return; }
+        }
+
+        for(const dateStr of datesToClear){
+          const existing = await dbGetEntry(driverId, dateStr);
+
+          // se era cobertura indeterminada auto, limpa futuros
+          if(existing?.notes && hasAutoCov(existing.notes)){
+            const covOpen = extractCovOpenId(existing.notes || "");
+            if(covOpen){
+              await clearFutureAutoCoverageInMonth(state, driverId, dateStr, covOpen);
+            }
+          }
+
+          // se era folga/férias com cobridor (normal), apaga cobridor do mesmo dia
+          if(existing && (existing.kind==="folga" || existing.kind==="ferias") && existing.covered_by_driver_id){
+            await dbDeleteEntry(existing.covered_by_driver_id, dateStr);
+          }
+
+          await dbDeleteEntry(driverId, dateStr);
+        }
+
+        closeEdit();
+        await loadMonthEntriesIntoState();
+        renderAll();
+        toast("Limpo ✅");
+      }catch(e){
+        alert("Erro ao limpar: " + (e?.message || e));
+      }finally{
+        setBusy(false);
+      }
+    });
+
+    btnSaveDay.addEventListener("click", async ()=>{
+      if(!editCtx.driverId || !editCtx.dateStr) return;
+      try{
+        setBusy(true);
+
+        const driverId = editCtx.driverId;
+        const clickedDate = editCtx.dateStr;
+
+        const isRange = applyRange.checked;
+        let dateList = [clickedDate];
+
+        if(isRange){
+          const s=(eStart.value||"").trim();
+          const e=(eEnd.value||"").trim();
+          if(!s||!e){ alert("Preencha data inicial e final."); return; }
+          dateList = buildRangeDates(s,e).filter(d=>withinSelectedMonth(state,d));
+          if(!dateList.length){ alert("Intervalo inválido / fora do mês."); return; }
+        }
+
+        const kind = eKind.value;
+        const line = (eLine.value||"").trim();
+        const time_hhmm = (eTime.value||"").trim();
+        const pontaSel = String(ePonta.value||"").trim();
+        let ponta = null;
+        if(pontaSel==="TP"||pontaSel==="TS") ponta = pontaSel;
+        else if(pontaSel==="CIRCULAR") ponta = "Circular";
+
+        const notesClean = (eNotes.value||"").trim();
+        const code7Selected = (eCode7.value||"").trim();
+        const periodSelected = (ePeriod.value||"M").trim();
+        const coveredBy = (eCoverSelect.value||"").trim();
+        const openCover = !!eOpenCover.checked;
+
+        // Se marcou indeterminado, exige cobridor
+        if(openCover && (kind==="folga"||kind==="ferias") && !coveredBy){
+          alert("Para Tempo indeterminado, selecione quem vai cobrir.");
+          return;
+        }
+
+        // Antes de salvar um dia “retorno”, limpar autos a partir desse dia
+        // (se existir cobertura indeterminada ativa por AUTO nos dias seguintes)
+        const existingClicked = await dbGetEntry(driverId, clickedDate);
+        if(existingClicked && hasAutoCov(existingClicked.notes || "")){
+          const covOpen = extractCovOpenId(existingClicked.notes || "");
+          if(covOpen){
+            await clearFutureAutoCoverageInMonth(state, driverId, clickedDate, covOpen);
+          }
+        }
+
+        // Salva dias do intervalo
+        for(const d of dateList){
+          await saveOneDay(
+            driverId, d, kind, line, time_hhmm, ponta,
+            notesClean, code7Selected, periodSelected,
+            (kind==="folga"||kind==="ferias") ? coveredBy : "",
+            openCover && (d===dateList[0]) // marcador COVOPEN só no primeiro dia do intervalo
+          );
+        }
+
+        // Se tempo indeterminado: auto preencher do primeiro dia até o fim do mês
+        if(openCover && (kind==="folga"||kind==="ferias")){
+          await applyOpenCoverageFromStartToEndOfMonth(
+            state, driverId, dateList[0], kind, line, time_hhmm, ponta, coveredBy
+          );
+        }
+
+        closeEdit();
+        await loadMonthEntriesIntoState();
+        renderAll();
+        toast("Salvo ✅");
+      }catch(e){
+        alert("Erro ao salvar: " + (e?.message || e));
+      }finally{
+        setBusy(false);
+      }
+    });
+
+    /* ======================
+       LOAD + RENDER
+       ====================== */
+    async function loadMonthEntriesIntoState(){
+      const rows = await dbGetEntriesForMonth(state.selectedMonth);
+      const by = {};
+      for(const r of rows){
+        if(!by[r.driver_id]) by[r.driver_id] = {};
+        by[r.driver_id][r.work_date] = {
+          kind: r.kind || "trabalho",
+          line: r.line || "",
+          time_hhmm: r.time_hhmm || "",
+          ponta: r.ponta || "",
+          covered_by_driver_id: r.covered_by_driver_id || "",
+          notes: r.notes || "",
+          code7: extractCode7FromNotes(r.notes || "")
+        };
+      }
+      state.entriesByDriver = by;
+    }
+
+    function renderAll(){
+      renderTable();
+      if(drawer.classList.contains("open")){
+        renderCalendar();
+      }
+    }
+
+    /* ======================
+       AUTH
+       ====================== */
+    function renderAuth(isAuthed){
+      if(isAuthed){
+        loginView.classList.add("hidden");
+        appView.classList.remove("hidden");
+      }else{
+        loginView.classList.remove("hidden");
+        appView.classList.add("hidden");
+      }
+    }
+
+    async function refreshSessionAndRender(){
+      const { data } = await supabase.auth.getSession();
+      renderAuth(!!data.session);
+      return data.session;
+    }
+
+    btnLogin.addEventListener("click", async ()=>{
+      loginErr.style.display="none";
+      const email = (loginEmail.value||"").trim();
+      const password = (loginPass.value||"").trim();
+      if(!email || !password){ loginErr.textContent="Preencha email e senha."; loginErr.style.display="block"; return; }
+
+      try{
+        setBusy(true);
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if(error) throw error;
+
+        renderAuth(true);
+        await boot();
+      }catch(e){
+        loginErr.textContent = "Erro ao logar: " + (e?.message || e);
+        loginErr.style.display="block";
+      }finally{
+        setBusy(false);
+      }
+    });
+
+    btnLogout.addEventListener("click", async ()=>{
+      try{
+        setBusy(true);
+        await supabase.auth.signOut();
+        renderAuth(false);
+      }catch(e){
+        alert("Erro ao sair: " + (e?.message || e));
+      }finally{
+        setBusy(false);
+      }
+    });
+
+    /* ======================
+       FILTERS / MONTH
+       ====================== */
+    monthPicker.addEventListener("change", async ()=>{
+      const v = monthPicker.value; // YYYY-MM
+      if(!v) return;
+      const [Y,M] = v.split("-").map(Number);
+      state.selectedMonth = new Date(Y, M-1, 1);
+
+      try{
+        setBusy(true);
+        await loadMonthEntriesIntoState();
+        await applyAllOpenCoveragesForSelectedMonth(state); // aplica coberturas indeterminadas ativas
+        await loadMonthEntriesIntoState();
+        renderAll();
+      }catch(e){
+        alert("Erro ao carregar mês: " + (e?.message || e));
+      }finally{
+        setBusy(false);
+      }
+    });
+
+    searchMat.addEventListener("input", ()=>{
+      state.searchText = String(searchMat.value||"").trim().toLowerCase();
+      renderTable();
+    });
+    roleFilter.addEventListener("change", ()=>{
+      state.roleFilter = roleFilter.value;
+      renderTable();
+    });
+    lineFilter.addEventListener("input", ()=>{
+      state.lineFilterText = String(lineFilter.value||"").trim();
+      renderTable();
+    });
+
+    /* ======================
+       BOOT
+       ====================== */
+    async function boot(){
+      ensureMonthInit();
+      fillCode7Options();
+
+      state.drivers = await dbGetDrivers();
+      await loadMonthEntriesIntoState();
+      await applyAllOpenCoveragesForSelectedMonth(state);
+      await loadMonthEntriesIntoState();
+
+      renderAll();
     }
 
     /* Init */
-    (async function init(){
-      loginEmail.value = ADMIN_EMAIL;
-      roleFilter.value = state.roleFilter;
-
-      fillCode7Options();
-
+    (async ()=>{
       const session = await refreshSessionAndRender();
-      ensureMonthInit();
-
       if(session){
-        await loadFromDBAndRender();
-      }else{
-        show(loginView);
-        hide(appView);
-        setTimeout(() => loginPass.focus(), 50);
+        try{
+          setBusy(true);
+          await boot();
+        }catch(e){
+          alert("Erro ao carregar: " + (e?.message || e));
+        }finally{
+          setBusy(false);
+        }
       }
     })();
   </script>
