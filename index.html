@@ -13,22 +13,22 @@
 
   <style>
     :root{
-      /* 🎨 TEMA PESSEGO (vermelho do logo) */
-      --brand:#E30613;          /* vermelho principal do logo */
-      --brand2:#ff4b55;         /* vermelho claro (apoio) */
-      --brandSoft: rgba(227,6,19,.10);
+      /* 🎨 TEMA AZUL (novo) */
+      --brand:#1677ff;          /* azul principal */
+      --brand2:#4aa3ff;         /* azul claro (apoio) */
+      --brandSoft: rgba(22,119,255,.12);
 
       --bg0:#ffffff;
-      --bg1:#fff3f4;            /* branco com toque vermelho */
+      --bg1:#f2f7ff;            /* branco com toque azul */
       --panel: rgba(255,255,255,.78);
       --panel2: rgba(255,255,255,.90);
       --border: rgba(0,0,0,.10);
-      --text: #111418;
-      --muted: rgba(17,20,24,.65);
-      --muted2: rgba(17,20,24,.50);
+      --text: #0f1624;
+      --muted: rgba(15,22,36,.65);
+      --muted2: rgba(15,22,36,.50);
 
       --c1: var(--brand);
-      --c2: #111418;            /* preto/cinza do logo */
+      --c2: #0f1624;
       --c3: var(--brand2);
 
       --warn:#ffb300;
@@ -37,28 +37,28 @@
       --radius:18px;
       --shadow: 0 14px 34px rgba(0,0,0,.12);
       --shadow2: 0 10px 26px rgba(0,0,0,.10);
-      --glow1: 0 0 18px rgba(227,6,19,.22);
+      --glow1: 0 0 18px rgba(22,119,255,.22);
 
       --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
 
       /* Cores por tipo */
-      --chip-trabalho-bg: rgba(227, 6, 19, .10);
-      --chip-trabalho-bd: rgba(227, 6, 19, .55);
+      --chip-trabalho-bg: rgba(22, 119, 255, .12);
+      --chip-trabalho-bd: rgba(22, 119, 255, .58);
 
-      --chip-plantao-bg: rgba(0, 0, 0, .06);
-      --chip-plantao-bd: rgba(0, 0, 0, .25);
+      --chip-plantao-bg: rgba(15, 22, 36, .06);
+      --chip-plantao-bd: rgba(15, 22, 36, .22);
 
-      --chip-ferias-bg: rgba(255, 75, 85, .10);
-      --chip-ferias-bd: rgba(255, 75, 85, .45);
+      --chip-ferias-bg: rgba(74, 163, 255, .12);
+      --chip-ferias-bd: rgba(74, 163, 255, .45);
 
       --chip-folga-bg: rgba(255, 179, 0, .16);
       --chip-folga-bd: rgba(255, 179, 0, .55);
 
-      --chip-cobertura-bg: rgba(227, 6, 19, .14);
-      --chip-cobertura-bd: rgba(227, 6, 19, .60);
+      --chip-cobertura-bg: rgba(22, 119, 255, .16);
+      --chip-cobertura-bd: rgba(22, 119, 255, .62);
 
-      --toast:#111418;
+      --toast:#0f1624;
     }
 
     *{ box-sizing: border-box; }
@@ -68,31 +68,39 @@
       font-family: var(--sans);
       color: var(--text);
       background:
-        radial-gradient(1200px 700px at 15% 10%, rgba(227,6,19,.12), transparent 55%),
-        radial-gradient(900px 520px at 80% 15%, rgba(255,75,85,.10), transparent 55%),
-        radial-gradient(900px 520px at 55% 95%, rgba(0,0,0,.06), transparent 55%),
+        radial-gradient(1200px 700px at 15% 10%, rgba(22,119,255,.14), transparent 55%),
+        radial-gradient(900px 520px at 80% 15%, rgba(74,163,255,.12), transparent 55%),
+        radial-gradient(900px 520px at 55% 95%, rgba(15,22,36,.06), transparent 55%),
         linear-gradient(180deg, var(--bg0), var(--bg1));
       overflow-x:hidden;
     }
 
     .hidden{ display:none !important; }
 
+    /* ✅ FUNDO COM LINHAS (substitui o círculo) */
     .neon-ring{
       position: fixed;
-      top: -240px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 760px;
-      height: 760px;
-      border-radius: 50%;
+      inset: 0;
       pointer-events:none;
-      opacity:.50;
+      opacity: .65;
       background:
-        radial-gradient(circle at 50% 50%, transparent 58%, rgba(0,0,0,.0) 58%),
-        conic-gradient(from 0deg, var(--c2), var(--c1), var(--c3), var(--c2));
-      -webkit-mask: radial-gradient(circle, transparent 58%, #000 61%);
-      mask: radial-gradient(circle, transparent 58%, #000 61%);
-      filter: blur(.2px);
+        repeating-linear-gradient(
+          135deg,
+          rgba(22,119,255,.10) 0px,
+          rgba(22,119,255,.10) 1px,
+          transparent 1px,
+          transparent 14px
+        ),
+        repeating-linear-gradient(
+          45deg,
+          rgba(74,163,255,.08) 0px,
+          rgba(74,163,255,.08) 1px,
+          transparent 1px,
+          transparent 18px
+        ),
+        radial-gradient(1200px 700px at 18% 14%, rgba(22,119,255,.10), transparent 55%),
+        radial-gradient(900px 520px at 82% 16%, rgba(74,163,255,.08), transparent 55%);
+      filter: blur(.1px);
     }
 
     .wrap{
@@ -165,9 +173,9 @@
     .btn:active{ transform: translateY(1px); }
     .btn:disabled{ opacity:.6; cursor:not-allowed; }
 
-    .btn.primary{ border-color: rgba(227,6,19,.40); box-shadow: var(--shadow2), var(--glow1); }
+    .btn.primary{ border-color: rgba(22,119,255,.42); box-shadow: var(--shadow2), var(--glow1); }
     .btn.purple{ border-color: rgba(0,0,0,.18); box-shadow: var(--shadow2); }
-    .btn.green{ border-color: rgba(227,6,19,.32); box-shadow: var(--shadow2), var(--glow1); }
+    .btn.green{ border-color: rgba(22,119,255,.34); box-shadow: var(--shadow2), var(--glow1); }
     .btn.danger{ border-color: rgba(255,47,93,.35); box-shadow: var(--shadow2); }
 
     .pill{
@@ -192,7 +200,7 @@
       box-shadow: inset 0 0 0 1px rgba(255,255,255,.25);
       min-width: 220px;
     }
-    .input::placeholder{ color: rgba(17,20,24,.45); }
+    .input::placeholder{ color: rgba(15,22,36,.45); }
     .select{ min-width: 160px; cursor:pointer; }
 
     .muted{ color: var(--muted); }
@@ -236,7 +244,7 @@
       position: sticky;
       top:0;
       z-index: 2;
-      background: rgba(255,250,250,.98);
+      background: rgba(250,252,255,.98);
       border-bottom:1px solid rgba(0,0,0,.10);
       color: var(--text);
       text-align:left;
@@ -251,14 +259,14 @@
       vertical-align: top;
       white-space:nowrap;
     }
-    tbody tr:hover{ background: rgba(227,6,19,.04); }
+    tbody tr:hover{ background: rgba(22,119,255,.04); }
 
     .col-driver{
       min-width: 440px;
       position: sticky;
       left:0;
       z-index: 1;
-      background: rgba(255,250,250,.98);
+      background: rgba(250,252,255,.98);
       border-right:1px solid rgba(0,0,0,.10);
     }
     thead .col-driver{ z-index: 3; border-right:1px solid rgba(0,0,0,.12); }
@@ -305,7 +313,7 @@
       display:flex;
       align-items:center;
       justify-content:center;
-      color: rgba(17,20,24,.75);
+      color: rgba(15,22,36,.75);
     }
 
     .chip{
@@ -332,16 +340,16 @@
     .chip:active{ transform: translateY(1px); }
 
     .chip.empty{
-      color: rgba(17,20,24,.40);
+      color: rgba(15,22,36,.40);
       border-style:dashed;
       background: rgba(255,255,255,.62);
       font-weight: 850;
     }
-    .chip.trabalho{ border-color: var(--chip-trabalho-bd); background: var(--chip-trabalho-bg); box-shadow: 0 0 14px rgba(227,6,19,.08); }
+    .chip.trabalho{ border-color: var(--chip-trabalho-bd); background: var(--chip-trabalho-bg); box-shadow: 0 0 14px rgba(22,119,255,.10); }
     .chip.plantao{ border-color: var(--chip-plantao-bd); background: var(--chip-plantao-bg); }
     .chip.ferias{ border-color: var(--chip-ferias-bd); background: var(--chip-ferias-bg); }
     .chip.folga{ border-color: var(--chip-folga-bd); background: var(--chip-folga-bg); }
-    .chip.cobertura{ border-color: var(--chip-cobertura-bd); background: var(--chip-cobertura-bg); box-shadow: 0 0 14px rgba(227,6,19,.09); }
+    .chip.cobertura{ border-color: var(--chip-cobertura-bd); background: var(--chip-cobertura-bg); box-shadow: 0 0 14px rgba(22,119,255,.12); }
 
     /* Drawer */
     .drawer{
@@ -349,7 +357,7 @@
       top:0; right:0;
       width: min(740px, 96vw);
       height: 100%;
-      background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,243,244,.96));
+      background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(242,247,255,.96));
       border-left: 1px solid rgba(0,0,0,.10);
       box-shadow: -18px 0 40px rgba(0,0,0,.18);
       backdrop-filter: blur(14px);
@@ -402,7 +410,7 @@
     .cal-head{
       display:grid;
       grid-template-columns: repeat(7,1fr);
-      background: rgba(227,6,19,.08);
+      background: rgba(22,119,255,.10);
       border-bottom:1px solid rgba(0,0,0,.10);
     }
     .cal-head div{
@@ -454,7 +462,7 @@
       font-family: var(--mono);
       font-weight: 950;
       font-size: 12px;
-      color: rgba(17,20,24,.75);
+      color: rgba(15,22,36,.75);
     }
 
     .day .val{
@@ -473,7 +481,7 @@
     .day .val.empty{
       border-style:dashed;
       background: rgba(255,255,255,.72);
-      color: rgba(17,20,24,.40);
+      color: rgba(15,22,36,.40);
       font-weight: 850;
     }
     .day .val.trabalho{ border-color: var(--chip-trabalho-bd); background: var(--chip-trabalho-bg); }
@@ -482,21 +490,21 @@
     .day .val.folga{ border-color: var(--chip-folga-bd); background: var(--chip-folga-bg); }
     .day .val.cobertura{ border-color: var(--chip-cobertura-bd); background: var(--chip-cobertura-bg); }
 
-    .day:hover{ background: rgba(227,6,19,.06); }
+    .day:hover{ background: rgba(22,119,255,.06); }
     .day.muted{ opacity:.35; cursor: default; background: transparent; }
     .day.muted:hover{ background: transparent; }
 
     /* Modo de captura */
     .captureMode{
       background: #ffffff !important;
-      color: #111418 !important;
+      color: #0f1624 !important;
     }
     .captureMode .card{
       box-shadow: none !important;
       border: 1px solid rgba(0,0,0,.14) !important;
       background: #fff !important;
     }
-    .captureMode .cal-head{ background: rgba(227,6,19,.14) !important; }
+    .captureMode .cal-head{ background: rgba(22,119,255,.16) !important; }
     .captureMode .calendar{ background: #fff !important; border-color: rgba(0,0,0,.16) !important; }
     .captureMode .day{ background: #fff !important; border-color: rgba(0,0,0,.12) !important; }
     .captureMode .day:hover{ background:#fff !important; }
@@ -518,7 +526,7 @@
       width: min(780px, 96vw);
       border-radius: 18px;
       border:1px solid rgba(0,0,0,.14);
-      background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,243,244,.96));
+      background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(242,247,255,.96));
       box-shadow: var(--shadow);
       overflow:hidden;
     }
@@ -847,6 +855,7 @@
           <b id="eDriver"></b><br/>
           <b id="eDate"></b>
           <span id="ePeriodBadge" class="kbd" style="margin-left:6px;"></span>
+          <span id="roleBadge" class="kbd" style="margin-left:6px;"></span>
         </div>
 
         <div class="row">
@@ -971,7 +980,16 @@
     /* 🔧 TROQUE para o Supabase NOVO dos motoristas */
     const SUPABASE_URL = "https://SUA-URL.supabase.co";
     const SUPABASE_ANON = "SUA-ANON-KEY";
-    const ADMIN_EMAIL = "SEU-EMAIL@empresa.com.br";
+
+    // ✅ perfis do seu projeto
+    const ADMINS = new Set([
+      "rafael.plantao@pessegotransportes.com.br",
+      "jones.plantao@pessegotransportes.com.br"
+    ]);
+    const VIEWER_EMAIL = "plantao@pessegotransportes.com.br";
+
+    // (somente para pré-preencher o email)
+    const DEFAULT_EMAIL = "rafael.plantao@pessegotransportes.com.br";
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON, {
       auth: { persistSession: true, autoRefreshToken: true }
@@ -985,11 +1003,8 @@
       searchText: "",
       roleFilter: "todos",
       lineFilterText: "",
-
-      // ✅ Auth/Permissões
-      userId: null,
-      userRole: "viewer",        // "admin" | "viewer"
-      canEdit: false
+      userRole: null,           // ✅ "admin" ou "viewer"
+      userEmail: null
     };
 
     let isBusy = false;
@@ -1131,16 +1146,17 @@
     function setBusy(v){
       isBusy = v;
       btnLogin.disabled = v;
-      btnAddDriver.disabled = v;
+      btnAddDriver.disabled = v || (state.userRole === "viewer");
       btnLogout.disabled = v;
-      btnSaveDriver.disabled = v;
-      btnSaveDay.disabled = v;
-      btnClearDay.disabled = v;
-      btnRemoveDriver.disabled = v;
+      btnSaveDriver.disabled = v || (state.userRole === "viewer");
+      btnSaveDay.disabled = v || (state.userRole === "viewer");
+      btnClearDay.disabled = v || (state.userRole === "viewer");
+      btnRemoveDriver.disabled = v || (state.userRole === "viewer");
       btnWhats.disabled = v;
-      btnEditDriver.disabled = v;
+      btnEditDriver.disabled = v || (state.userRole === "viewer");
       btnCloseEdit.disabled = v;
       btnCloseAdd.disabled = v;
+      btnClearCover.disabled = v || (state.userRole === "viewer");
     }
 
     function isValidCode7(code){
@@ -1315,6 +1331,7 @@
     const eDriver = document.getElementById("eDriver");
     const eDate = document.getElementById("eDate");
     const ePeriodBadge = document.getElementById("ePeriodBadge");
+    const roleBadge = document.getElementById("roleBadge");
 
     const applySingle = document.getElementById("applySingle");
     const applyRange = document.getElementById("applyRange");
@@ -1338,77 +1355,35 @@
     let editCtx = { driverId:null, dateStr:null, period:"manha" };
     let driverFormMode = { mode:"create", driverId:null };
 
-    // ==============================
-    // ✅ PERMISSÕES (admin/viewer)
-    // ==============================
-    function isAdmin(){
-      return state.userRole === "admin";
-    }
-
+    /* ✅ UI por role */
     function applyRoleUI(){
-      state.canEdit = isAdmin();
+      const isViewer = state.userRole === "viewer";
 
-      // Topo
-      btnAddDriver.style.display = state.canEdit ? "inline-flex" : "none";
+      // topo
+      btnAddDriver.style.display = isViewer ? "none" : "";
+      btnEditDriver.style.display = isViewer ? "none" : "";
+      btnRemoveDriver.style.display = isViewer ? "none" : "";
 
-      // Drawer
-      btnEditDriver.style.display = state.canEdit ? "inline-flex" : "none";
-      btnRemoveDriver.style.display = state.canEdit ? "inline-flex" : "none";
+      // modal day
+      btnSaveDay.style.display = isViewer ? "none" : "";
+      btnClearDay.style.display = isViewer ? "none" : "";
 
-      // Modais
-      btnSaveDriver.style.display = state.canEdit ? "inline-flex" : "none";
-      btnSaveDay.style.display = state.canEdit ? "inline-flex" : "none";
-      btnClearDay.style.display = state.canEdit ? "inline-flex" : "none";
+      // modal driver
+      btnSaveDriver.style.display = isViewer ? "none" : "";
 
-      // Se for viewer, garante que não fique com modal aberto de edição
-      if(!state.canEdit){
-        // não fecha o drawer (viewer pode ver)
-        // mas evita ficar preso em modal edit
-        if(editOverlay.classList.contains("show")) closeEdit();
-        // e também evita modal de motorista
-        if(addOverlay.classList.contains("show")) closeAdd();
-      }
-    }
+      // bloqueia inputs quando viewer
+      const lock = (el, locked) => {
+        if(!el) return;
+        el.disabled = !!locked;
+      };
 
-    async function fetchMyRoleFromProfiles(userId){
-      // Se não achar perfil, cai como viewer
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", userId)
-        .maybeSingle();
+      // Add/Edit Driver inputs
+      [inMat,inName,inPhone,inRole,inLine,inPontaBase].forEach(el => lock(el, isViewer));
 
-      if(error){
-        // Mostra erro real (RLS, etc.)
-        throw new Error(`Erro ao ler perfil (profiles): ${error.message}${error.code ? ` [${error.code}]` : ""}${error.status ? ` (status ${error.status})` : ""}`);
-      }
+      // Edit Day inputs
+      [applySingle,applyRange,eStart,eEnd,eIndef,ePeriod,eKind,eLine,eTime,ePonta,eCode7,eCoverSelect,btnClearCover,eNotes].forEach(el => lock(el, isViewer));
 
-      const role = (data?.role || "viewer").toLowerCase().trim();
-      if(role !== "admin" && role !== "viewer") return "viewer";
-      return role;
-    }
-
-    async function hydrateAuthAndRole(){
-      const { data: sessionData, error: sessErr } = await supabase.auth.getSession();
-      if(sessErr){
-        throw new Error(`Erro ao obter sessão: ${sessErr.message}${sessErr.status ? ` (status ${sessErr.status})` : ""}`);
-      }
-      const session = sessionData?.session || null;
-      if(!session){
-        state.userId = null;
-        state.userRole = "viewer";
-        state.canEdit = false;
-        applyRoleUI();
-        return null;
-      }
-
-      state.userId = session.user.id;
-
-      // Busca role no profiles
-      state.userRole = await fetchMyRoleFromProfiles(state.userId);
-      applyRoleUI();
-
-      return session;
+      setBusy(isBusy); // reaplica disabled corretamente
     }
 
     /* DB */
@@ -1552,6 +1527,36 @@
       return streak;
     }
 
+    /* ✅ PROFILES / ROLE */
+    async function ensureProfile(){
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if(error) throw error;
+      if(!user) return null;
+
+      state.userEmail = (user.email || "").toLowerCase();
+
+      const { data: prof, error: selErr } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if(selErr) throw selErr;
+
+      if(!prof){
+        const role = ADMINS.has(state.userEmail) ? "admin" : "viewer";
+        const { error: insErr } = await supabase
+          .from("profiles")
+          .insert({ id: user.id, role });
+        if(insErr) throw insErr;
+        state.userRole = role;
+        return role;
+      }
+
+      state.userRole = prof.role || (ADMINS.has(state.userEmail) ? "admin" : "viewer");
+      return state.userRole;
+    }
+
     /* Auth */
     function renderAuth(isAuthed){
       if(isAuthed){
@@ -1564,9 +1569,9 @@
     }
 
     async function refreshSessionAndRender(){
-      const session = await hydrateAuthAndRole();
-      renderAuth(!!session);
-      return session;
+      const { data } = await supabase.auth.getSession();
+      renderAuth(!!data.session);
+      return data.session;
     }
 
     btnLogin.addEventListener("click", async () => {
@@ -1576,27 +1581,18 @@
 
       try{
         setBusy(true);
-
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
         if(error){
-          const msg = `${error.message || "Falha no login."}${error.status ? ` (status ${error.status})` : ""}`;
-          loginErr.textContent = msg;
+          loginErr.textContent = error.message || "Email ou senha inválidos.";
           loginErr.style.display = "block";
           return;
         }
-
-        // ✅ garante role carregado e UI aplicada
         await refreshSessionAndRender();
-
-        // ✅ carrega dados
+        await ensureProfile();
+        applyRoleUI();
         await loadFromDBAndRender();
-
-        // feedback
-        toast(state.userRole === "admin" ? "Logado como ADMIN ✅" : "Logado como VISUALIZADOR ✅", 2600);
-
       }catch(err){
-        loginErr.textContent = (err?.message || String(err) || "Erro desconhecido no login.");
+        loginErr.textContent = err?.message || String(err);
         loginErr.style.display = "block";
       }finally{
         setBusy(false);
@@ -1611,11 +1607,9 @@
         setBusy(true);
         await supabase.auth.signOut();
         closeDrawer();
+        state.userRole = null;
+        state.userEmail = null;
         renderAuth(false);
-        state.userId = null;
-        state.userRole = "viewer";
-        state.canEdit = false;
-        applyRoleUI();
       }finally{
         setBusy(false);
       }
@@ -1653,8 +1647,8 @@
 
     /* Driver modal */
     function openDriverModalCreate(){
-      if(!state.canEdit){
-        toast("Apenas ADMIN pode cadastrar motoristas.", 2800);
+      if(state.userRole === "viewer"){
+        toast("Conta Viewer: somente visualização.");
         return;
       }
       driverFormMode = { mode:"create", driverId:null };
@@ -1666,12 +1660,13 @@
       inLine.value = "";
       inPontaBase.value = "";
       addOverlay.classList.add("show");
+      applyRoleUI();
       setTimeout(()=> inMat.focus(), 60);
     }
 
     function openDriverModalEdit(driverId){
-      if(!state.canEdit){
-        toast("Apenas ADMIN pode editar motoristas.", 2800);
+      if(state.userRole === "viewer"){
+        toast("Conta Viewer: somente visualização.");
         return;
       }
       const drv = state.drivers.find(d => d.id === driverId);
@@ -1689,6 +1684,7 @@
       inPontaBase.value = (base === "TP" || base === "TS") ? base : (base === "Circular" ? "CIRCULAR" : "");
 
       addOverlay.classList.add("show");
+      applyRoleUI();
       setTimeout(()=> inName.focus(), 60);
     }
 
@@ -1698,8 +1694,8 @@
     addOverlay.addEventListener("click", (e)=>{ if(e.target === addOverlay) closeAdd(); });
 
     btnSaveDriver.addEventListener("click", async () => {
-      if(!state.canEdit){
-        toast("Sem permissão: apenas ADMIN.", 2800);
+      if(state.userRole === "viewer"){
+        toast("Conta Viewer: não é permitido salvar.");
         return;
       }
 
@@ -1831,11 +1827,6 @@
     }
 
     function openEdit(driverId, dateStr, period){
-      if(!state.canEdit){
-        toast("Modo visualização: apenas ADMIN pode editar.", 3000);
-        return;
-      }
-
       editCtx = { driverId, dateStr, period };
       const drv = state.drivers.find(d => d.id === driverId);
 
@@ -1844,6 +1835,8 @@
 
       ePeriod.value = period;
       ePeriodBadge.textContent = period === "manha" ? "Manhã" : "Tarde";
+
+      roleBadge.textContent = state.userRole === "viewer" ? "👀 Viewer (somente leitura)" : "👑 Admin";
 
       applySingle.checked = true;
       applyRange.checked = false;
@@ -1875,6 +1868,7 @@
       eCoverSelect.value = coveredBy || "";
 
       editOverlay.classList.add("show");
+      applyRoleUI();
       setTimeout(() => eLine.focus(), 60);
     }
 
@@ -1946,8 +1940,8 @@
 
     /* LIMPAR */
     btnClearDay.addEventListener("click", async () => {
-      if(!state.canEdit){
-        toast("Sem permissão: apenas ADMIN.", 2800);
+      if(state.userRole === "viewer"){
+        toast("Conta Viewer: não é permitido limpar.");
         return;
       }
       if(!editCtx.driverId || !editCtx.dateStr) return;
@@ -1995,8 +1989,8 @@
     });
 
     btnSaveDay.addEventListener("click", async () => {
-      if(!state.canEdit){
-        toast("Sem permissão: apenas ADMIN.", 2800);
+      if(state.userRole === "viewer"){
+        toast("Conta Viewer: não é permitido salvar.");
         return;
       }
       if(!editCtx.driverId || !editCtx.dateStr) return;
@@ -2126,7 +2120,7 @@
         drv.line_default ? `🚌 ${drv.line_default}` : null,
         drv.ponta_base ? `📍 ${drv.ponta_base}` : null,
         `🏷️ ${statusForDriverToday(drv.id)}`,
-        `🔐 ${state.userRole.toUpperCase()}`
+        state.userRole ? (state.userRole === "viewer" ? `👀 viewer` : `👑 admin`) : null
       ].filter(Boolean);
 
       dSub.innerHTML = meta.map(m => `<span class="kbd">${escapeHtml(m)}</span>`).join(" ");
@@ -2138,6 +2132,7 @@
       btnFull.textContent = "🧩 Voltar";
       drawer.scrollTop = 0;
 
+      applyRoleUI();
       renderCalendar();
     }
 
@@ -2162,11 +2157,10 @@
     });
 
     btnRemoveDriver.addEventListener("click", async () => {
-      if(!state.canEdit){
-        toast("Sem permissão: apenas ADMIN.", 2800);
+      if(state.userRole === "viewer"){
+        toast("Conta Viewer: não é permitido remover.");
         return;
       }
-
       const id = state.selectedDriverId;
       if(!id) return;
       const drv = state.drivers.find(d => d.id === id);
@@ -2271,7 +2265,7 @@
       for(let d=1; d<=nDays; d++){
         const dt = new Date(y, m-1, d);
         const dow = dowShort[dt.getDay()];
-        th.push(`<th title="${dow}">${pad2(d)}<div style="color:rgba(17,20,24,.55);font-weight:900;font-size:11px;margin-top:2px;">${dow}</div></th>`);
+        th.push(`<th title="${dow}">${pad2(d)}<div style="color:rgba(15,22,36,.55);font-weight:900;font-size:11px;margin-top:2px;">${dow}</div></th>`);
       }
       th.push(`</tr>`);
       monthThead.innerHTML = th.join("");
@@ -2339,13 +2333,13 @@
               <div class="cell">
                 <div class="miniRow">
                   <div class="tagPeriod">M</div>
-                  <span class="${clsM}" data-edit="${drv.id}" data-date="${dateStr}" data-period="manha" title="${state.canEdit ? "Editar manhã" : "Visualização"}">
+                  <span class="${clsM}" data-edit="${drv.id}" data-date="${dateStr}" data-period="manha" title="${state.userRole==='viewer'?'Visualizar manhã':'Editar manhã'}">
                     <span class="chipText">${htmlM}</span>
                   </span>
                 </div>
                 <div class="miniRow">
                   <div class="tagPeriod">T</div>
-                  <span class="${clsT}" data-edit="${drv.id}" data-date="${dateStr}" data-period="tarde" title="${state.canEdit ? "Editar tarde" : "Visualização"}">
+                  <span class="${clsT}" data-edit="${drv.id}" data-date="${dateStr}" data-period="tarde" title="${state.userRole==='viewer'?'Visualizar tarde':'Editar tarde'}">
                     <span class="chipText">${htmlT}</span>
                   </span>
                 </div>
@@ -2365,10 +2359,6 @@
       monthTbody.querySelectorAll("[data-edit]").forEach(el => {
         el.addEventListener("click", (e) => {
           e.stopPropagation();
-          if(!state.canEdit){
-            toast("Modo visualização: apenas ADMIN pode editar.", 2800);
-            return;
-          }
           openEdit(
             el.getAttribute("data-edit"),
             el.getAttribute("data-date"),
@@ -2412,12 +2402,12 @@
           <div class="day">
             <div class="num">${pad2(d)}</div>
 
-            <div class="dayRow" data-editcal="${dateStr}" data-period="manha" title="${state.canEdit ? "Editar" : "Visualização"}">
+            <div class="dayRow" data-editcal="${dateStr}" data-period="manha">
               <div class="pTag">M</div>
               <div class="${valClsM}">${labelM}</div>
             </div>
 
-            <div class="dayRow" data-editcal="${dateStr}" data-period="tarde" title="${state.canEdit ? "Editar" : "Visualização"}">
+            <div class="dayRow" data-editcal="${dateStr}" data-period="tarde">
               <div class="pTag">T</div>
               <div class="${valClsT}">${labelT}</div>
             </div>
@@ -2436,10 +2426,6 @@
       calGrid.querySelectorAll("[data-editcal]").forEach(el => {
         el.addEventListener("click", (e) => {
           e.stopPropagation();
-          if(!state.canEdit){
-            toast("Modo visualização: apenas ADMIN pode editar.", 2800);
-            return;
-          }
           openEdit(id, el.getAttribute("data-editcal"), el.getAttribute("data-period"));
         });
       });
@@ -2476,7 +2462,7 @@
 
       setBusy(true);
       try{
-        // ✅ aplica UI de role (caso ainda não tenha)
+        if(!state.userRole) await ensureProfile();
         applyRoleUI();
 
         state.drivers = await dbGetDrivers();
@@ -2491,29 +2477,30 @@
 
     /* Init */
     (async function init(){
-      loginEmail.value = ADMIN_EMAIL;
+      loginEmail.value = DEFAULT_EMAIL;
       roleFilter.value = state.roleFilter;
 
       fillCode7Options();
 
-      try{
-        const session = await refreshSessionAndRender();
-        ensureMonthInit();
+      const session = await refreshSessionAndRender();
+      ensureMonthInit();
 
-        if(session){
+      if(session){
+        try{
+          await ensureProfile();
+          applyRoleUI();
           await loadFromDBAndRender();
-        }else{
+        }catch(err){
+          // se der problema em profiles/policies, mostra erro
           show(loginView);
           hide(appView);
-          applyRoleUI();
-          setTimeout(() => loginPass.focus(), 50);
+          loginErr.textContent = err?.message || String(err);
+          loginErr.style.display = "block";
         }
-      }catch(err){
-        // se falhar role/RLS, mostra claramente
+      }else{
         show(loginView);
         hide(appView);
-        loginErr.textContent = err?.message || String(err);
-        loginErr.style.display = "block";
+        setTimeout(() => loginPass.focus(), 50);
       }
     })();
   </script>
