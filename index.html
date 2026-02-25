@@ -985,6 +985,11 @@
       searchText: "",
       roleFilter: "todos",
       lineFilterText: "",
+
+      // ✅ Auth/Permissões
+      userId: null,
+      userRole: "viewer",        // "admin" | "viewer"
+      canEdit: false
     };
 
     let isBusy = false;
@@ -1333,6 +1338,79 @@
     let editCtx = { driverId:null, dateStr:null, period:"manha" };
     let driverFormMode = { mode:"create", driverId:null };
 
+    // ==============================
+    // ✅ PERMISSÕES (admin/viewer)
+    // ==============================
+    function isAdmin(){
+      return state.userRole === "admin";
+    }
+
+    function applyRoleUI(){
+      state.canEdit = isAdmin();
+
+      // Topo
+      btnAddDriver.style.display = state.canEdit ? "inline-flex" : "none";
+
+      // Drawer
+      btnEditDriver.style.display = state.canEdit ? "inline-flex" : "none";
+      btnRemoveDriver.style.display = state.canEdit ? "inline-flex" : "none";
+
+      // Modais
+      btnSaveDriver.style.display = state.canEdit ? "inline-flex" : "none";
+      btnSaveDay.style.display = state.canEdit ? "inline-flex" : "none";
+      btnClearDay.style.display = state.canEdit ? "inline-flex" : "none";
+
+      // Se for viewer, garante que não fique com modal aberto de edição
+      if(!state.canEdit){
+        // não fecha o drawer (viewer pode ver)
+        // mas evita ficar preso em modal edit
+        if(editOverlay.classList.contains("show")) closeEdit();
+        // e também evita modal de motorista
+        if(addOverlay.classList.contains("show")) closeAdd();
+      }
+    }
+
+    async function fetchMyRoleFromProfiles(userId){
+      // Se não achar perfil, cai como viewer
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", userId)
+        .maybeSingle();
+
+      if(error){
+        // Mostra erro real (RLS, etc.)
+        throw new Error(`Erro ao ler perfil (profiles): ${error.message}${error.code ? ` [${error.code}]` : ""}${error.status ? ` (status ${error.status})` : ""}`);
+      }
+
+      const role = (data?.role || "viewer").toLowerCase().trim();
+      if(role !== "admin" && role !== "viewer") return "viewer";
+      return role;
+    }
+
+    async function hydrateAuthAndRole(){
+      const { data: sessionData, error: sessErr } = await supabase.auth.getSession();
+      if(sessErr){
+        throw new Error(`Erro ao obter sessão: ${sessErr.message}${sessErr.status ? ` (status ${sessErr.status})` : ""}`);
+      }
+      const session = sessionData?.session || null;
+      if(!session){
+        state.userId = null;
+        state.userRole = "viewer";
+        state.canEdit = false;
+        applyRoleUI();
+        return null;
+      }
+
+      state.userId = session.user.id;
+
+      // Busca role no profiles
+      state.userRole = await fetchMyRoleFromProfiles(state.userId);
+      applyRoleUI();
+
+      return session;
+    }
+
     /* DB */
     async function dbGetDrivers(){
       const { data, error } = await supabase
@@ -1486,9 +1564,9 @@
     }
 
     async function refreshSessionAndRender(){
-      const { data } = await supabase.auth.getSession();
-      renderAuth(!!data.session);
-      return data.session;
+      const session = await hydrateAuthAndRole();
+      renderAuth(!!session);
+      return session;
     }
 
     btnLogin.addEventListener("click", async () => {
@@ -1498,14 +1576,28 @@
 
       try{
         setBusy(true);
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
         if(error){
-          loginErr.textContent = error.message || "Email ou senha inválidos.";
+          const msg = `${error.message || "Falha no login."}${error.status ? ` (status ${error.status})` : ""}`;
+          loginErr.textContent = msg;
           loginErr.style.display = "block";
           return;
         }
+
+        // ✅ garante role carregado e UI aplicada
         await refreshSessionAndRender();
+
+        // ✅ carrega dados
         await loadFromDBAndRender();
+
+        // feedback
+        toast(state.userRole === "admin" ? "Logado como ADMIN ✅" : "Logado como VISUALIZADOR ✅", 2600);
+
+      }catch(err){
+        loginErr.textContent = (err?.message || String(err) || "Erro desconhecido no login.");
+        loginErr.style.display = "block";
       }finally{
         setBusy(false);
       }
@@ -1520,6 +1612,10 @@
         await supabase.auth.signOut();
         closeDrawer();
         renderAuth(false);
+        state.userId = null;
+        state.userRole = "viewer";
+        state.canEdit = false;
+        applyRoleUI();
       }finally{
         setBusy(false);
       }
@@ -1557,6 +1653,10 @@
 
     /* Driver modal */
     function openDriverModalCreate(){
+      if(!state.canEdit){
+        toast("Apenas ADMIN pode cadastrar motoristas.", 2800);
+        return;
+      }
       driverFormMode = { mode:"create", driverId:null };
       driverModalTitle.textContent = "Cadastrar motorista";
       inMat.value = "";
@@ -1570,6 +1670,10 @@
     }
 
     function openDriverModalEdit(driverId){
+      if(!state.canEdit){
+        toast("Apenas ADMIN pode editar motoristas.", 2800);
+        return;
+      }
       const drv = state.drivers.find(d => d.id === driverId);
       if(!drv) return;
 
@@ -1594,6 +1698,11 @@
     addOverlay.addEventListener("click", (e)=>{ if(e.target === addOverlay) closeAdd(); });
 
     btnSaveDriver.addEventListener("click", async () => {
+      if(!state.canEdit){
+        toast("Sem permissão: apenas ADMIN.", 2800);
+        return;
+      }
+
       const mat = (inMat.value || "").trim();
       const name = (inName.value || "").trim();
       const phone = (inPhone.value || "").trim();
@@ -1722,6 +1831,11 @@
     }
 
     function openEdit(driverId, dateStr, period){
+      if(!state.canEdit){
+        toast("Modo visualização: apenas ADMIN pode editar.", 3000);
+        return;
+      }
+
       editCtx = { driverId, dateStr, period };
       const drv = state.drivers.find(d => d.id === driverId);
 
@@ -1832,6 +1946,10 @@
 
     /* LIMPAR */
     btnClearDay.addEventListener("click", async () => {
+      if(!state.canEdit){
+        toast("Sem permissão: apenas ADMIN.", 2800);
+        return;
+      }
       if(!editCtx.driverId || !editCtx.dateStr) return;
 
       try{
@@ -1877,6 +1995,10 @@
     });
 
     btnSaveDay.addEventListener("click", async () => {
+      if(!state.canEdit){
+        toast("Sem permissão: apenas ADMIN.", 2800);
+        return;
+      }
       if(!editCtx.driverId || !editCtx.dateStr) return;
 
       try{
@@ -2003,7 +2125,8 @@
         drv.role ? `👤 ${drv.role}` : null,
         drv.line_default ? `🚌 ${drv.line_default}` : null,
         drv.ponta_base ? `📍 ${drv.ponta_base}` : null,
-        `🏷️ ${statusForDriverToday(drv.id)}`
+        `🏷️ ${statusForDriverToday(drv.id)}`,
+        `🔐 ${state.userRole.toUpperCase()}`
       ].filter(Boolean);
 
       dSub.innerHTML = meta.map(m => `<span class="kbd">${escapeHtml(m)}</span>`).join(" ");
@@ -2039,6 +2162,11 @@
     });
 
     btnRemoveDriver.addEventListener("click", async () => {
+      if(!state.canEdit){
+        toast("Sem permissão: apenas ADMIN.", 2800);
+        return;
+      }
+
       const id = state.selectedDriverId;
       if(!id) return;
       const drv = state.drivers.find(d => d.id === id);
@@ -2211,13 +2339,13 @@
               <div class="cell">
                 <div class="miniRow">
                   <div class="tagPeriod">M</div>
-                  <span class="${clsM}" data-edit="${drv.id}" data-date="${dateStr}" data-period="manha" title="Editar manhã">
+                  <span class="${clsM}" data-edit="${drv.id}" data-date="${dateStr}" data-period="manha" title="${state.canEdit ? "Editar manhã" : "Visualização"}">
                     <span class="chipText">${htmlM}</span>
                   </span>
                 </div>
                 <div class="miniRow">
                   <div class="tagPeriod">T</div>
-                  <span class="${clsT}" data-edit="${drv.id}" data-date="${dateStr}" data-period="tarde" title="Editar tarde">
+                  <span class="${clsT}" data-edit="${drv.id}" data-date="${dateStr}" data-period="tarde" title="${state.canEdit ? "Editar tarde" : "Visualização"}">
                     <span class="chipText">${htmlT}</span>
                   </span>
                 </div>
@@ -2237,6 +2365,10 @@
       monthTbody.querySelectorAll("[data-edit]").forEach(el => {
         el.addEventListener("click", (e) => {
           e.stopPropagation();
+          if(!state.canEdit){
+            toast("Modo visualização: apenas ADMIN pode editar.", 2800);
+            return;
+          }
           openEdit(
             el.getAttribute("data-edit"),
             el.getAttribute("data-date"),
@@ -2280,12 +2412,12 @@
           <div class="day">
             <div class="num">${pad2(d)}</div>
 
-            <div class="dayRow" data-editcal="${dateStr}" data-period="manha">
+            <div class="dayRow" data-editcal="${dateStr}" data-period="manha" title="${state.canEdit ? "Editar" : "Visualização"}">
               <div class="pTag">M</div>
               <div class="${valClsM}">${labelM}</div>
             </div>
 
-            <div class="dayRow" data-editcal="${dateStr}" data-period="tarde">
+            <div class="dayRow" data-editcal="${dateStr}" data-period="tarde" title="${state.canEdit ? "Editar" : "Visualização"}">
               <div class="pTag">T</div>
               <div class="${valClsT}">${labelT}</div>
             </div>
@@ -2304,6 +2436,10 @@
       calGrid.querySelectorAll("[data-editcal]").forEach(el => {
         el.addEventListener("click", (e) => {
           e.stopPropagation();
+          if(!state.canEdit){
+            toast("Modo visualização: apenas ADMIN pode editar.", 2800);
+            return;
+          }
           openEdit(id, el.getAttribute("data-editcal"), el.getAttribute("data-period"));
         });
       });
@@ -2340,6 +2476,9 @@
 
       setBusy(true);
       try{
+        // ✅ aplica UI de role (caso ainda não tenha)
+        applyRoleUI();
+
         state.drivers = await dbGetDrivers();
         await loadMonthEntriesIntoState();
         renderAll();
@@ -2357,15 +2496,24 @@
 
       fillCode7Options();
 
-      const session = await refreshSessionAndRender();
-      ensureMonthInit();
+      try{
+        const session = await refreshSessionAndRender();
+        ensureMonthInit();
 
-      if(session){
-        await loadFromDBAndRender();
-      }else{
+        if(session){
+          await loadFromDBAndRender();
+        }else{
+          show(loginView);
+          hide(appView);
+          applyRoleUI();
+          setTimeout(() => loginPass.focus(), 50);
+        }
+      }catch(err){
+        // se falhar role/RLS, mostra claramente
         show(loginView);
         hide(appView);
-        setTimeout(() => loginPass.focus(), 50);
+        loginErr.textContent = err?.message || String(err);
+        loginErr.style.display = "block";
       }
     })();
   </script>
